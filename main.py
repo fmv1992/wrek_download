@@ -35,12 +35,13 @@ args = parser.parse_args()
 # definitions and parsing specifications
 tmp_dir = '/tmp'
 dest_dir = os.path.expandvars('$HOME/music/wrek_atlanta')
-m3u_dir = os.path.expandvars('$HOME/bin/python/wrek_download/archive')
+m3u_dir = os.path.expandvars('$HOME/bin/git/wrek_download/archive')
 socket.setdefaulttimeout(15)
 if args.verbose is True:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                         level=logging.INFO, datefmt='%Y/%m/%d %H:%M')
-
+black_list = ['atmospherics', 'classics', 'overnight_alternatives',
+              'rock_rythm_and_roll', 'just_jazz', '']
 # body
 auxf.wait_for_change_day()
 
@@ -56,26 +57,31 @@ for sub in [True, False]:
                     # creates filename
                     filename = auxf.filename(line, program, nr_program,
                                              nr_line)
-                    if auxf.date_is_in_range(
-                    dt(int(filename[0:4]),
-                       int(filename[4:6]), int(filename[6:8]))) is True:
-                        # check if exists
-                        if os.path.isfile(dest_dir + '/' + filename) is True:
-                            logging.info('File %s already exists. Skipping.',
-                                         str(dest_dir + '/' + filename))
-                        else:
-                            # downloads to tmp dir
-                            logging.info('Downloading %s from %s', filename,
-                                         line[:-1])
-                            # if you want to create the file just for testing
-                            # os.mknod(str(tmp_dir + '/' + filename))
-                            urllib.request.urlretrieve(line,
-                                filename=str(tmp_dir + '/' + filename))
-                            # move to final dir
-                            os.rename(str(tmp_dir + '/' + filename),
-                                      str(dest_dir + '/' + filename))
-                            logging.info('Done downloading %s', filename)
-                            #input()
+                    if auxf.is_blacklisted(filename, black_list) is True:
+                        logging.info('Skipping %s since it is blacklisted.',
+                                     filename)
+                    else:
+                        # checks if program is within acceptable range.
+                        if auxf.date_is_in_range(
+                        dt(int(filename[0:4]),
+                           int(filename[4:6]), int(filename[6:8]))) is True:
+                            # check if exists
+                            if os.path.isfile(dest_dir + '/' + filename) is True:
+                                logging.info('File %s already exists. Skipping.',
+                                             str(dest_dir + '/' + filename))
+                            else:
+                                # downloads to tmp dir
+                                logging.info('Downloading %s from %s', filename,
+                                             line[:-1])
+                                # if you want to create the file just for testing
+                                # os.mknod(str(tmp_dir + '/' + filename))
+                                urllib.request.urlretrieve(line,
+                                    filename=str(tmp_dir + '/' + filename))
+                                # move to final dir
+                                os.rename(str(tmp_dir + '/' + filename),
+                                          str(dest_dir + '/' + filename))
+                                logging.info('Done downloading %s', filename)
+                                #input()
                     # update numbers and loop
                     nr_line += 1
                     line = m3ufile.readline()

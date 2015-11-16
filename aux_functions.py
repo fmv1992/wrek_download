@@ -75,44 +75,12 @@ def filename(link, m3ufilename, program_number, block_number):
        '.mp3'))
     return name
 
-#date1 = datetime.datetime.now() - datetime.timedelta(days=-2)
-#filename('http:link_previous', 'SSV.m3u', 99, 99 )    
-    
-
-    
-    
-    
-    
-    
-    
-    
-#def download(days_prior_to_today=1):
-#    """Generates a list of file names from 13 days prior to today until
-#    days_prior_to_today"""
-#    now = datetime.datetime.now()
-#    starting_day = now.weekday() - days_prior_to_today
-#    new_date = now
-#    print(lists.week + lists.week[starting_day:])
-#    input()
-#    for weekday in lists.week + lists.week[starting_day:]:
-#        for (nr_pr, program) in enumerate(weekday):
-#            prg_name = lists.program_names[re.search('[A-Z]{2,4}',
-#                                                     program).group(0)]
-#            with open(str(
-#            archive_folder + '/' + program), 'rt') as m3ufile:
-#                for (block_number, link) in enumerate(m3ufile.readlines()):
-#                    name = str(str(new_date.year) + 
-#                       str('{0:02d}'.format(new_date.month)) +
-#                       str('{0:02d}'.format(new_date.day) +
-#                       '_' +
-#                       str('{0:02d}'.format(nr_pr)) + '_' +
-#                       prg_name + '_' +
-#                       str('{0:02d}'.format(block_number)) +
-#                       '.mp3'))
-##                    if i < now.weekday() and i >= 1:
-##                        pass
-##                    else:
-##                        link = link.replace('main','previous')
-#                    print(link, 'to', name, flush=True)
-#                    #input()
-#download()                    
+def is_blacklisted(x, l):
+    """Checks if string x is in any occurence of list l."""
+    for entry in l:
+        regex_search = re.search('(?<=[0-9]{8}\_[0-9][0-9]\_)[a-z_]+'
+                                 '(?=[0-9][0-9]\.mp3)', x)
+        if regex_search:
+            if str(entry + '_') == regex_search.group(0):
+                return True
+    return False
