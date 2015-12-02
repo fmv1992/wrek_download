@@ -10,6 +10,7 @@ program_names = {
 'AR': 'alternative_radio',
 'ATM': 'atmospherics',
 'BAPR': 'back_alley_pork_roost',
+'BDWY': 'a_bit_off_broadway',
 'BLBX': 'inside_the_black_box',
 'BOK': 'the_best_of_our_knowledge',
 'BPS': 'blue_plate_special',
@@ -29,9 +30,10 @@ program_names = {
 'FOP': 'fifty_one_percent',
 'FR': 'friction',
 'GS': 'gold_soundz',
+'HET': 'high_end_theory',
 'HOS': 'hour_of_slack',
 'JAZZ': 'just_jazz',
-'KN': 'kosher_noise',
+'KN': 'kosher_noise',  # deprecated
 'LAW': 'live_at_wrek',
 'LITS': 'lost_in_the_stacks',
 'MOB': 'mobius',
@@ -51,6 +53,7 @@ program_names = {
 'SS': 'sunday_special',
 'SSV': 'sub_saharan_vibes',
 'TAPA': 'tapas_and_tunes',
+'TECH': 'techniques',
 'TLBS': 'the_longboards_show',
 'TN': 'tech_nation',
 'TWO': 'this_way_out',
@@ -60,9 +63,19 @@ program_names = {
 'WRR': 'wrekroom_renaissance',
 }
 
-monday = ['ATM_10000.m3u', 'OA_10300.m3u', 'CL_10600.m3u', 'JAZZ_10900.m3u',
-          'NAL.m3u', 'RRR_11300.m3u', 'TAPA.m3u', 'KN.m3u', 'SLAW.m3u',
-          'SSV.m3u', 'WC_12200.m3u']
+monday = ['ATM_10000.m3u',
+'OA_10300.m3u',
+'CL_10600.m3u',
+'JAZZ_10900.m3u',
+'NAL.m3u',
+'RRR_11300.m3u',
+'TAPA.m3u', 
+#'KN.m3u', # deprecated
+'HET.m3u',
+'SLAW.m3u',
+'SSV.m3u',
+'WC_12200.m3u'
+]
 tuesday =[
 'ATM_20000.m3u',
 'OA_20300.m3u',
@@ -95,12 +108,13 @@ thursday = [
 'OA_40300.m3u',
 'CL_40600.m3u',
 'JAZZ_40900.m3u',
-'BPS.m3u',
+#'BPS.m3u', # deprecated
 'RRR_41300.m3u',
 'WC_41800.m3u',
 'SCFI.m3u',
 'FFFS.m3u',
-'WRR.m3u',
+#'WRR.m3u', # deprecated
+'TECH.m3u',
 'EB.m3u',
 ]
 friday = [
