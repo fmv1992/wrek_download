@@ -20,7 +20,7 @@ The range of downloading days should be 12 october untill 22 october
 from datetime import datetime as dt
 import os
 import aux_functions as auxf
-from lists import week
+from lists import week, white_list, program_names
 import socket
 import urllib.request
 import logging
@@ -40,10 +40,15 @@ socket.setdefaulttimeout(15)
 if args.verbose is True:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                         level=logging.INFO, datefmt='%Y/%m/%d %H:%M')
-black_list = ['atmospherics', 'classics', 'overnight_alternatives',
-              'rock_rythm_and_roll', 'just_jazz', '']
 # body
 auxf.wait_for_change_day()
+
+# creating a black list from whitelist; it is easier this way
+black_list = []
+for program in program_names.values():
+    if program not in white_list:
+        black_list.append(program)
+logging.info('Skipping black listed programs: %s', '\n'.join(black_list))
 
 for sub in [True, False]:
     for day in week:

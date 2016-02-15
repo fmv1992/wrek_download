@@ -69,7 +69,7 @@ monday = ['ATM_10000.m3u',
 'JAZZ_10900.m3u',
 'NAL.m3u',
 'RRR_11300.m3u',
-'TAPA.m3u', 
+'TAPA.m3u',
 #'KN.m3u', # deprecated
 'HET.m3u',
 'SLAW.m3u',
@@ -102,7 +102,7 @@ wednesday = [
 'DAM.m3u',
 'FR.m3u',
 'PO.m3u',
-]          
+]
 thursday = [
 'ATM_40000.m3u',
 'OA_40300.m3u',
@@ -154,3 +154,7 @@ sunday = [
 'PC.m3u'
 ]
 week = [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+
+white_list = ['wrekroom_renaissance', 'techniques','sunday_special',
+              'stonehenge', 'mobius', 'high_end_theory',
+              'back_alley_pork_roost', 'friday_night_fish_fry']
