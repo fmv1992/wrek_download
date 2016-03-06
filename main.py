@@ -30,19 +30,24 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--verbose', help='puts the program in verbose mode',
                     action="store_true", default=False)
+parser.add_argument('--verbosity', help='sets the verbosity of the program. '
+                                        'Use 1 for error and 2 for info',
+                    type=int, default=1)
 args = parser.parse_args()
 
 # definitions and parsing specifications
 tmp_dir = '/tmp'
 dest_dir = os.path.expandvars('$HOME/music/wrek_atlanta')
-m3u_dir = os.path.expandvars('$HOME/bin/git/wrek_download/archive')
 socket.setdefaulttimeout(15)
-if args.verbose is True:
+if args.verbosity == 2:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                         level=logging.INFO, datefmt='%Y/%m/%d %H:%M')
+elif args.verbosity == 1:
+    logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
+                        level=logging.ERROR, datefmt='%Y/%m/%d %H:%M')
+
 # body
 auxf.wait_for_change_day()
-
 # creating a black list from whitelist; it is easier this way
 black_list = []
 for program in program_names.values():
@@ -68,26 +73,30 @@ for sub in [True, False]:
                                      filename)
                     else:
                         # checks if program is within acceptable range.
-                        if auxf.date_is_in_range(
-                        dt(int(filename[0:4]),
+                        if auxf.date_is_in_range(dt(int(filename[0:4]),
                            int(filename[4:6]), int(filename[6:8]))) is True:
                             # check if exists
-                            if os.path.isfile(dest_dir + '/' + filename) is True:
-                                logging.info('File %s already exists. Skipping.',
-                                             str(dest_dir + '/' + filename))
+                            if os.path.isfile(os.path.join(dest_dir,
+                                                           filename)) is True:
+                                logging.info('File %s already exists.'
+                                             'Skipping.',
+                                             os.path.join(dest_dir, filename))
                             else:
                                 # downloads to tmp dir
-                                logging.info('Downloading %s from %s', filename,
-                                             line[:-1])
-                                # if you want to create the file just for testing
-                                # os.mknod(str(tmp_dir + '/' + filename))
-                                urllib.request.urlretrieve(line,
-                                    filename=str(tmp_dir + '/' + filename))
-                                # move to final dir
-                                os.rename(str(tmp_dir + '/' + filename),
-                                          str(dest_dir + '/' + filename))
-                                logging.info('Done downloading %s', filename)
-                                #input()
+                                logging.info('Downloading %s from %s',
+                                             filename, line[:-1])
+                                try:
+                                    urllib.request.urlretrieve(line,
+                                                 filename=os.path.join(tmp_dir,
+                                                                     filename))
+                                    # move to final dir
+                                    os.rename(os.path.join(tmp_dir, filename),
+                                              os.path.join(dest_dir, filename))
+                                    logging.info('Done downloading %s',
+                                                 filename)
+                                except urllib.error.HTTPError:
+                                    logging.error('Could not download {0} '
+                                          'due to HTTP Error'.format(filename))
                     # update numbers and loop
                     nr_line += 1
                     line = m3ufile.readline()
