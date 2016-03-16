@@ -4,6 +4,8 @@ Created on Wed Oct 28 13:24:56 2015
 
 @author: monteiro
 """
+import re
+import os
 
 suffixes = ['AR.m3u', 'ATM_10000.m3u', 'ATM_20000.m3u', 'ATM_30000.m3u', 'ATM_40000.m3u', 'ATM_50000.m3u', 'BAPR.m3u', 'BLBX.m3u', 'BOK.m3u', 'BPS.m3u', 'BSTF.m3u', 'BTL.m3u', 'CAS.m3u', 'CC.m3u', 'CF.m3u', 'CL_10600.m3u', 'CL_20600.m3u', 'CL_30600.m3u', 'CL_40600.m3u', 'CL_50600.m3u', 'DAM.m3u', 'DH.m3u', 'EB.m3u', 'EDM.m3u', 'FFFS.m3u', 'FKBL.m3u', 'FNFF.m3u', 'FOP.m3u', 'FR.m3u', 'GS.m3u', 'HOS.m3u', 'JAZZ_10900.m3u', 'JAZZ_20900.m3u', 'JAZZ_30900.m3u', 'JAZZ_40900.m3u', 'JAZZ_50900.m3u', 'KN.m3u', 'LAW.m3u', 'LITS.m3u', 'MOB.m3u', 'MODE.m3u', 'NAL.m3u', 'NF.m3u', 'OA_10300.m3u', 'OA_20300.m3u', 'OA_30300.m3u', 'OA_40300.m3u', 'OA_50300.m3u', 'PC.m3u', 'PO.m3u', 'PR.m3u', 'RB.m3u', 'RRR_11300.m3u', 'RRR_21300.m3u', 'RRR_31300.m3u', 'RRR_41300.m3u', 'RRR_51300.m3u', 'RWR.m3u', 'SCFI.m3u', 'SH.m3u', 'SLAW.m3u', 'SS.m3u', 'SSV.m3u', 'TAPA.m3u', 'TLBS.m3u', 'TN.m3u', 'TWO.m3u', 'UGR.m3u', 'WC_00200.m3u', 'WC_01200.m3u', 'WC_12200.m3u', 'WC_41800.m3u', 'WC_60600.m3u', 'WRKG.m3u', 'WRR.m3u']
 program_names = {
@@ -155,6 +157,7 @@ sunday = [
 ]
 week = [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
 
-white_list = ['wrekroom_renaissance', 'techniques','sunday_special',
-              'stonehenge', 'mobius', 'high_end_theory',
-              'back_alley_pork_roost', 'friday_night_fish_fry']
+def whitelist(wl_path=os.path.join(os.path.dirname(__file__), 'wrek_whitelist.txt')):
+    with open(wl_path, 'rt') as f:
+        return list(re.findall('^[^#]+?$', f.read(), flags=re.MULTILINE))
+
