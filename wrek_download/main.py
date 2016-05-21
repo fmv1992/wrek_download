@@ -59,8 +59,9 @@ logging.info('Skipping black listed programs: %s', '\n'.join(black_list))
 for sub in [True, False]:
     for day in week:
         for (nr_program, program) in enumerate(day):
-            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   'archive', program), 'rt') as m3ufile:
+            with open(os.path.join(os.path.dirname(os.path.dirname(
+             os.path.realpath(__file__))),
+             'archive', program), 'rt') as m3ufile:
                 nr_line = 0
                 line = m3ufile.readline()
                 while line != '':
