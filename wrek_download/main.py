@@ -44,16 +44,17 @@ parser.add_argument('--temporaryfolder', help='Temporary folder for ongoing down
                     required=False,
                     default=pathlib.Path('/tmp')
                     )
-
+parser.add_argument('--outputfolder', help='Output folder to put downloaded files when finished.',
+                    required=True
+                    )
 args = parser.parse_args()
 
 # Path specifications
-archive_folder = os.path.expandvars('$HOME/bin/python/wrek_download/archive')
-
+archive_folder = str(args.archivefolder.absolute())
+tmp_dir = str(args.temporaryfolder)
+dest_dir = str(args.outputfolder)
 
 # definitions and parsing specifications
-tmp_dir = '/tmp'
-dest_dir = os.path.expandvars('$HOME/music/wrek_atlanta')
 socket.setdefaulttimeout(15)
 if args.verbosity == 2:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
