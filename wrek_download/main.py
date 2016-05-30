@@ -19,21 +19,37 @@ The range of downloading days should be 12 october untill 22 october
 # imports
 from datetime import datetime as dt
 import os
-import aux_functions as auxf
-from lists import week, program_names
+import pathlib
 import socket
 import urllib.request
 import logging
 import argparse
+import aux_functions as auxf
+from lists import week, program_names
 
-# parsing
+one_level_parent_folder = pathlib.Path(os.path.abspath(__file__)).parents[0]
+
+# Parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--verbose', help='puts the program in verbose mode',
                     action="store_true", default=False)
 parser.add_argument('--verbosity', help='sets the verbosity of the program. '
                                         'Use 1 for error and 2 for info',
                     type=int, default=1)
+parser.add_argument('--archivefolder', help='Archive folder where the m3u files are.',
+                    required=False,
+                    default=one_level_parent_folder/'archive'
+                    )
+parser.add_argument('--temporaryfolder', help='Temporary folder for ongoing downloads.',
+                    required=False,
+                    default=pathlib.Path('/tmp')
+                    )
+
 args = parser.parse_args()
+
+# Path specifications
+archive_folder = os.path.expandvars('$HOME/bin/python/wrek_download/archive')
+
 
 # definitions and parsing specifications
 tmp_dir = '/tmp'

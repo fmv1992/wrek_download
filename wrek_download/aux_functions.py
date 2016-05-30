@@ -11,9 +11,6 @@ import os
 import re
 import lists
 
-# Paths
-archive_folder = os.path.expandvars('$HOME/bin/python/wrek_download/archive')
-
 
 def wait_for_change_day():
     """Waits if we are near the end of the day. This is done to
