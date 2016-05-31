@@ -21,6 +21,7 @@ The program then downloads the files from the archive formated with YYYYMMDD fol
 ## TODO
 - improve verbosity functionality
 - rely on pathlib only instead of a mix of pathlib and strings
+	- on hold since pathlib may be removed from stdlib
 - put whitelitest file as an argument
 - remove blacklist from code
 - get m3u files from website (the program should update itself)

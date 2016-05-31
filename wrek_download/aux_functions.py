@@ -91,7 +91,6 @@ def is_blacklisted(x, l):
     return False
 
 
-def whitelist(wl_path=os.path.join(os.path.dirname(__file__),
-                                   'wrek_whitelist.txt')):
-    with open(wl_path, 'rt') as f:
+def whitelist(whitelistpath):
+    with whitelistpath.open() as f:
         return list(re.findall('^[^#]+?$', f.read(), flags=re.MULTILINE))

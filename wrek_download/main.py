@@ -52,6 +52,10 @@ parser.add_argument('--outputfolder',
                          'finished.',
                     required=True
                     )
+parser.add_argument('--whitelist',
+                    help='Selected programs to be downloaded.',
+                    required=True,
+                    )
 args = parser.parse_args()
 
 # Path specifications
@@ -59,8 +63,9 @@ args = parser.parse_args()
 archive_folder = str(args.archivefolder.absolute())
 tmp_dir = str(args.temporaryfolder)
 dest_dir = str(args.outputfolder)
+whitelist = pathlib.Path(args.whitelist)
 
-# definitions and parsing specifications
+# Definitions and parsing specifications
 socket.setdefaulttimeout(15)
 if args.verbosity == 2:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
@@ -69,17 +74,17 @@ elif args.verbosity == 1:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                         level=logging.ERROR, datefmt='%Y/%m/%d %H:%M')
 
-# body
+# Body
 auxf.wait_for_change_day()
-# creating a black list from whitelist; it is easier this way
+# Creating a black list from whitelist; it is easier this way
 black_list = []
-whitelist = auxf.whitelist()
+whitelist = auxf.whitelist(whitelist)
 for program in program_names.values():
     if program not in whitelist:
         black_list.append(program)
 logging.info('Skipping black listed programs: %s', '\n'.join(black_list))
 
-for sub in [True, False]:
+for sub in [True, False]:  # Alternates between current archive and old archive
     for day in week:
         for (nr_program, program) in enumerate(day):
             with open(os.path.join(os.path.dirname(os.path.dirname(
@@ -88,21 +93,21 @@ for sub in [True, False]:
                 nr_line = 0
                 line = m3ufile.readline()
                 while line != '':
-                    if sub is False:
+                    if sub:
                         line = line.replace('_old', '')
                     # Creates filename
                     filename = auxf.filename(line, program, nr_program,
                                              nr_line)
-                    if auxf.is_blacklisted(filename, black_list) is True:
+                    if auxf.is_blacklisted(filename, black_list):
                         logging.info('Skipping %s since it is blacklisted.',
                                      filename)
                     else:
                         # Checks if program is within acceptable range.
                         if auxf.date_is_in_range(dt(int(filename[0:4]),
-                           int(filename[4:6]), int(filename[6:8]))) is True:
-                            # check if exists
+                           int(filename[4:6]), int(filename[6:8]))):
+                            # Check if exists
                             if os.path.isfile(os.path.join(dest_dir,
-                                                           filename)) is True:
+                                                           filename)):
                                 logging.info('File %s already exists.'
                                              'Skipping.',
                                              os.path.join(dest_dir, filename))
@@ -115,7 +120,7 @@ for sub in [True, False]:
                                         line,
                                         filename=os.path.join(
                                             tmp_dir, filename))
-                                    # move to final dir
+                                    # Moves to final dir
                                     os.rename(os.path.join(tmp_dir, filename),
                                               os.path.join(dest_dir, filename))
                                     logging.info('Done downloading %s',
