@@ -79,6 +79,8 @@ auxf.wait_for_change_day()
 # Creating a black list from whitelist; it is easier this way
 black_list = []
 whitelist = auxf.whitelist(whitelist)
+# print(whitelist[0])
+# input()
 for program in program_names.values():
     if program not in whitelist:
         black_list.append(program)

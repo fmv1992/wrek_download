@@ -57,7 +57,7 @@ def filename(link, m3ufilename, program_number, block_number):
     """Creates the filename with:
     yyyymmdd_pn_programname_bn.mp3
     """
-    now = now = datetime.datetime.now()
+    now = datetime.datetime.now()
     for day in lists.week:
         if m3ufilename in day:
             weekday = lists.week.index(day)

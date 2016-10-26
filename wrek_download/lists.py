@@ -18,7 +18,8 @@ suffixes = ['AR.m3u', 'ATM_10000.m3u', 'ATM_20000.m3u', 'ATM_30000.m3u',
             'RRR_51300.m3u', 'RWR.m3u', 'SCFI.m3u', 'SH.m3u', 'SLAW.m3u',
             'SS.m3u', 'SSV.m3u', 'TAPA.m3u', 'TLBS.m3u', 'TN.m3u', 'TWO.m3u',
             'UGR.m3u', 'WC_00200.m3u', 'WC_01200.m3u', 'WC_12200.m3u',
-            'WC_41800.m3u', 'WC_60600.m3u', 'WRKG.m3u', 'WRR.m3u']
+            'WC_41800.m3u', 'WC_60600.m3u', 'WRKG.m3u', 'WRR.m3u',
+            'HET.m3u']
 
 program_names = {
     'AR': 'alternative_radio',

@@ -13,6 +13,7 @@ import httplib2
 import os
 import re
 import shutil
+import logging
 
 
 def main():
@@ -25,8 +26,6 @@ def main():
     deprec_archive_path = '../archive/deprecated_m3u_files'
 
     h = httplib2.Http(os.path.join(tmpdir, '.wrek_cache'))
-    # TODO: remove this global
-    global response, content
     response, content = h.request(url)
     text = content.decode()
     local_m3u_files_name = [f for f in os.listdir(archive_path) if
@@ -53,7 +52,15 @@ def main():
     for m3u in set(local_m3u_content.keys()) & set(remote_m3u_content.keys()):
         if local_m3u_content[m3u].replace('_old',
                                           '') != remote_m3u_content[m3u]:
-            shutil.move(os.path.join(archive_path, m3u), deprec_archive_path)
+            try:
+                shutil.move(os.path.join(archive_path, m3u), deprec_archive_path)
+            except shutil.Error as error01:
+                # if 'already exists' in error01:
+                    # TODO: fix this.
+                    # logging.info('Shutil error:', error01)
+                    print(error01)
+                    pass
+
 
     # Compares remote and local m3u files.
     extra_programs = set(remote_m3u_content.keys()) \
