@@ -62,7 +62,7 @@ class WREK_Show(object):
         self.m3u_filename = m3u_filename
         self.show_number_in_day = show_number_in_day
 
-    def download(self, destination_directory, temporary_directory='/tmp', download_old_archive=False):
+    def download(self, destination_directory, temporary_directory='/tmp', download_old_archive=True):
         u"""Download all the mp3 files in the m3u file."""
 
         def create_filename(self, download_old_archive):
@@ -79,8 +79,10 @@ class WREK_Show(object):
             while aired_day.weekday() != WEEKDAYS.index(self.weekday):
                 aired_day -= datetime.timedelta(days=1)
             if now - aired_day <= threshold_to_skip_download:
-                logging.info('Skipping program {0} due to closeness with today\'s date'.format(self.name))
-                return False
+                # TODO: fix this for 'old' in name.
+                # logging.info('Skipping program {0} due to closeness with today\'s date'.format(self.name))
+                # return False
+                pass
             if download_old_archive:
                 aired_day -= 7 * datetime.timedelta(days=1)
 
@@ -88,7 +90,7 @@ class WREK_Show(object):
                     + '{0:02d}'.format(aired_day.month)
                     + '{0:02d}'.format(aired_day.day) + '_'
                     + '{0:02d}'.format(self.show_number_in_day) + '_'
-                    + self.name + '.mp3')
+                    + self.name + '_.mp3')
             return name
 
 
@@ -128,9 +130,9 @@ class WREK_Show(object):
                                     temporary_directory,
                                     filename.replace('.mp3', '{0:02d}.mp3'.format(nr_line))
                                     ))
-                            # Moves to final dir
-                            os.rename(os.path.join(temporary_directory, self.name),
-                                        os.path.join(destination_directory, self.name))
+                            if destination_directory != temporary_directory:
+                                os.rename(os.path.join(temporary_directory, self.name),
+                                            os.path.join(destination_directory, self.name))
                         except:
                             pass
                         # Update numbers and loop
@@ -195,3 +197,5 @@ def initialize_shows():
 z = parse_wrek_website()
 y = initialize_shows()
 p = y[0]
+het = [x for x in y if 'theory' in x.name][0]
+het.download('/tmp', download_old_archive=True)
