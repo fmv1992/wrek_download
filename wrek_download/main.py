@@ -18,15 +18,17 @@ The range of downloading days should be 12 october untill 22 october
 # pylama:skip=1
 from datetime import datetime as dt
 import os
-import pathlib
 import socket
 import urllib.request
 import logging
 import argparse
 import aux_functions as auxf
 from lists import week, program_names
+from parse_wrek_website import WREK_Show, parse_wrek_website, initialize_shows
 
-one_level_parent_folder = pathlib.Path(os.path.abspath(__file__)).parents[0]
+ROOT_FOLDER = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)))
 
 # Parsing
 parser = argparse.ArgumentParser()
@@ -41,12 +43,12 @@ parser.add_argument('--verbosity',
 parser.add_argument('--archivefolder',
                     help='Archive folder where the m3u files are.',
                     required=False,
-                    default=one_level_parent_folder/'archive'
+                    default=os.path.join(ROOT_FOLDER, 'archive')
                     )
 parser.add_argument('--temporaryfolder',
                     help='Temporary folder for ongoing downloads.',
                     required=False,
-                    default=pathlib.Path('/tmp')
+                    default='/tmp'
                     )
 parser.add_argument('--outputfolder',
                     help='Output folder to put downloaded files when '
@@ -61,10 +63,10 @@ args = parser.parse_args()
 
 # Path specifications
 # TODO use the pathlib library to open files etc.
-archive_folder = str(args.archivefolder.absolute())
-tmp_dir = str(args.temporaryfolder)
-dest_dir = str(args.outputfolder)
-whitelist = pathlib.Path(args.whitelist)
+ARCHIVE_FOLDER = os.path.abspath(str(args.archivefolder))
+TMP_DIR = os.path.abspath(str(args.temporaryfolder))
+DEST_DIR = os.path.abspath(str(args.outputfolder))
+WHITELIST = os.path.abspath(str(args.whitelist))
 
 # Definitions and parsing specifications
 socket.setdefaulttimeout(15)
@@ -75,63 +77,39 @@ elif args.verbosity == 1:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                         level=logging.ERROR, datefmt='%Y/%m/%d %H:%M')
 
-# Body
-auxf.wait_for_change_day()
-# Creating a black list from whitelist; it is easier this way
-black_list = []
-whitelist = auxf.whitelist(whitelist)
-# print(whitelist[0])
-# input()
-for program in program_names.values():
-    if program not in whitelist:
-        black_list.append(program)
-logging.info('Skipping black listed programs: %s', '\n'.join(black_list))
+def main():
+    """Main function to download music from WREK."""
 
-for sub in [True, False]:  # Alternates between current archive and old archive
-    for day in week:
-        for (nr_program, program) in enumerate(day):
-            with open(os.path.join(os.path.dirname(os.path.dirname(
-                    os.path.realpath(__file__))),
-                    'archive', program), 'rt') as m3ufile:
-                nr_line = 0
-                line = m3ufile.readline()
-                while line != '':
-                    if sub:
-                        line = line.replace('_old', '')
-                    # Creates filename
-                    filename = auxf.filename(line, program, nr_program,
-                                             nr_line)
-                    if auxf.is_blacklisted(filename, black_list):
-                        logging.info('Skipping %s since it is blacklisted.',
-                                     filename)
-                    else:
-                        # Checks if program is within acceptable range.
-                        if auxf.date_is_in_range(dt(int(filename[0:4]),
-                           int(filename[4:6]), int(filename[6:8]))):
-                            # Check if exists
-                            if os.path.isfile(os.path.join(dest_dir,
-                                                           filename)):
-                                logging.info('File %s already exists.'
-                                             'Skipping.',
-                                             os.path.join(dest_dir, filename))
-                            else:
-                                # Downloads to tmp dir
-                                logging.info('Downloading %s from %s',
-                                             filename, line[:-1])
-                                try:
-                                    urllib.request.urlretrieve(
-                                        line,
-                                        filename=os.path.join(
-                                            tmp_dir, filename))
-                                    # Moves to final dir
-                                    os.rename(os.path.join(tmp_dir, filename),
-                                              os.path.join(dest_dir, filename))
-                                    logging.info('Done downloading %s',
-                                                 filename)
-                                except urllib.error.HTTPError:
-                                    logging.error(
-                                        'Could not download {0} '
-                                        'due to HTTP Error'.format(filename))
-                    # Update numbers and loop
-                    nr_line += 1
-                    line = m3ufile.readline()
+    # Wait for change day for them to update their data base.
+    #
+    # TODO: What is the purpose of this func?
+    # TODO: does this make sense? If we are offsetting the days (like waiting
+    # for two days to download) we are covered against this problem.
+    # TODO: maybe this could be called in between each downloads in case they
+    # take a long time.
+    auxf.wait_for_change_day()
+
+    # Initialize shows.
+    all_wrek_shows = initialize_shows()
+
+    # Initialize whitelist.
+    whitelist = auxf.create_whitelist(WHITELIST)
+
+    # Remove non whitelisted programs
+    whitelisted_wrek_shows = [x for x in all_wrek_shows if x.name in whitelist]
+
+    for show in whitelisted_wrek_shows:
+        show.download(
+            DEST_DIR,
+            temporary_directory=TMP_DIR,
+            download_old_archive=True)
+
+if __name__ == '__main__':
+    main()
+    # w = auxf.create_whitelist(WHITELIST)
+    # z = parse_wrek_website()
+    # y = initialize_shows()
+    # p = y[0]
+    # het = [x for x in y if 'theory' in x.name][0]
+    # atm = [x for x in y if 'atmosph' in x.name][0]
+    # het.download('/tmp', download_old_archive=True)

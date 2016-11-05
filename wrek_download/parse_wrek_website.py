@@ -43,30 +43,91 @@ WEEKDAYS = [ 'monday',
            ]
 
 
+# TODO: this class is lacking modularity.
+# Each function should do one thing well:
+#   Download
+#   Move
 class WREK_Show(object):
-    u"""WREK radio show object."""
+    u"""WREK radio show object.
 
-    def __init__(
-            self,
-            name,
-            weekday,
-            begin_time,
-            end_time,
-            m3u_filename,
-            show_number_in_day):
-        self.name = name
-        self.weekday = weekday
+    Methods:
+        download: Download all the mp3 files in the m3u file.
+
+    Attributes:
+        begin_time (str): begin time in format 00:00 AM.
+        end_time (str): end time in format 00:00 AM.
+        m3u_filename (str): the filename for the m3u file.
+        name (str): show name.
+        show_number_in_day (int): the numbering of the show in the day (starting
+        from zero).
+        weekday (str): weekday in which the show is aired.
+
+    """
+
+    def __init__(self,
+                 name,
+                 weekday,
+                 begin_time,
+                 end_time,
+                 m3u_filename,
+                 show_number_in_day):
+        u""" The init function for this class."""
+
         self.begin_time = begin_time
         self.end_time = end_time
         self.m3u_filename = m3u_filename
+        self.name = name
         self.show_number_in_day = show_number_in_day
+        self.weekday = weekday
 
-    def download(self, destination_directory, temporary_directory='/tmp', download_old_archive=True):
-        u"""Download all the mp3 files in the m3u file."""
+
+    def download(
+            self,
+            destination_directory,
+            temporary_directory='/tmp',
+            download_old_archive=True):
+        u"""Download all the mp3 files in the m3u file.
+
+        Download the mp3 file contained in the m3u file using a temporary
+        directory and moving finished downloaded files to a destination
+        directory. Name them accordingly.
+
+        Arguments:
+            destination_directory (str): the output folder for the downloaded
+            files.
+            temporary_directory (str): the temporary folder to hold the files
+            while they are being downloaded.
+            download_old_archive (bool): True to download files from the old
+            archive. False to download only files from the most recent week.
+
+        Returns:
+            bool: True if the function ran without errors.
+
+        """
 
         def create_filename(self, download_old_archive):
-            """Create the filename with:
-            yyyymmdd_pn_programname_bn.mp3
+            """Create a unique filename for each show based on its attributes.
+
+            Create a filename of the format:
+                yyyymmdd_pn_programname_bn.mp3
+            where:
+                'yyyy' is the year of the program.
+                'mm' is the month of the program.
+                'dd' is the day of the program.
+                'pn' is the program number of the program in that day. 00 for
+                the first program.
+                'programname' is the program name.
+                'bn' is the block number. WREK's show are composed of half hour
+                blocks so a full day would have 2 * 24 = 48 blocks
+
+            Arguments:
+                download_old_archive (bool): True to download files from the
+                old archive. False to download only files from the most
+                recent week.
+
+            Returns:
+                str: the show's name.
+
             """
             now = datetime.datetime.now()
             aired_day = datetime.datetime.now()
@@ -99,9 +160,9 @@ class WREK_Show(object):
                 destination_directory))
         if download_old_archive == True:
             pass
-        filename = create_filename(self, download_old_archive)
-        if not filename:  # In case filename gets False.
-            return False
+        # if not filename:  # In case filename gets False.
+            # return False
+        # TODO: check oif file already exists in destination folder
 
         with open(
                 os.path.join(
@@ -119,32 +180,49 @@ class WREK_Show(object):
             else:
                 iterate_over_old = (False, )
             for download_old_archive in iterate_over_old:
-                    while line != '':
-                        if download_old_archive:
-                            line = line.replace('.mp3', '_old.mp3')
-                        try:
-                            urllib.request.urlretrieve(
-                                line,
-                                filename=os.path.join(
-                                    temporary_directory,
-                                    filename.replace('.mp3', '{0:02d}.mp3'.format(nr_line))
-                                    ))
-                            if destination_directory != temporary_directory:
-                                os.rename(os.path.join(temporary_directory, self.name),
-                                            os.path.join(destination_directory, self.name))
-                        except:
-                            pass
-                        # Update numbers and loop
-                        nr_line += 1
-                        line = m3ufile.readline().replace('_old', '')
+                while line != '':
+                    filename = create_filename(self, download_old_archive)
+                    filename = filename.replace('.mp3', '{0:02d}.mp3'.format(nr_line))
+                    if download_old_archive:
+                        line = line.replace('.mp3', '_old.mp3')
+                    try:
+                        urllib.request.urlretrieve(
+                            line,
+                            filename=os.path.join(
+                                temporary_directory,
+                                filename,
+                                ))
+                        if destination_directory != temporary_directory:
+                            os.rename(os.path.join(temporary_directory, filename),
+                                        os.path.join(destination_directory, filename))
+                    # TODO: improve this excpetin.
+                    except Exception as e:
+                        pass
+                    # Update numbers and loop
+                    nr_line += 1
+                    line = m3ufile.readline().replace('_old', '')
         return True
 
-    def __repr__(self):
-            return 'Radio show {0.name} aired on {0.weekday} beginning at {0.begin_time} and ending at {0.end_time}.'.format(self)
+
 
 
 def parse_wrek_website(url='http://www.wrek.org/schedule/'):
-    u"""Parse WREK Atlanta website."""
+    u"""Parse WREK Atlanta website.
+
+    Parse WREK Atlanta website using a set of regular expressions to properly
+    initialize each program and its attributes.
+
+    Arguments:
+        url (str): URL string of the website to be parsed.
+
+    Returns:
+        dict: the dictionary containing keys for each of WREK's shows'
+        attributes and a list of values.
+            keys: begin_times, end_times, m3u_urls, names
+            values: list of lists of strings. The first level of the list
+            corrisponds to each day of the week starting from Monday.
+
+    """
     def filter_non_allowed_chars(x,
             allowed=string.ascii_letters + string.digits + '_'):
         u"""Filters out non allowed chars."""
@@ -176,12 +254,19 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
 
 
 def initialize_shows():
-    u"""Initialize all the shows objects."""
+    u"""Initialize all the shows objects.
+
+    Arguments:
+        (no arguments)
+
+    Returns:
+        list: A list full list of WREK_Show objects.
+
+    """
     all_shows = []
     parsed_shows_data = parse_wrek_website()
     for index_day, weekday in enumerate(WEEKDAYS):
         for index_program, program in enumerate(parsed_shows_data['names'][index_day]):
-            # print(program)
             all_shows.append(
                 WREK_Show(
                     program,
@@ -191,9 +276,3 @@ def initialize_shows():
                     parsed_shows_data['m3u_urls'][index_day][index_program],
                     index_program))
     return all_shows
-
-z = parse_wrek_website()
-y = initialize_shows()
-p = y[0]
-het = [x for x in y if 'theory' in x.name][0]
-het.download('/tmp', download_old_archive=True)

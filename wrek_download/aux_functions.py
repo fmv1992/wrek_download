@@ -89,6 +89,25 @@ def is_blacklisted(x, l):
     return False
 
 
-def whitelist(whitelistpath):
-    with whitelistpath.open() as f:
-        return list(re.findall('^[^#]+?$', f.read(), flags=re.MULTILINE))
+def is_whitelisted(entry, list_of_whitelist_patterns):
+    """Check if entry is on whitelist file.
+
+    Arguments:
+        entry (str): WREK's program name.
+        list_of_whitelist_patterns (list): list of whitelisted programs' names.
+
+    Returns:
+        bool: True if program is in whitelist. False otherwise.
+
+    """
+    for pattern in list_of_whitelist_patterns:
+
+        if regex_search:
+            if str(entry + '_') == regex_search.group(0):
+                return True
+    return False
+
+
+def create_whitelist(whitelistpath):
+    with open(whitelistpath, 'rt') as f:
+        return list(re.findall('^[^#\s]+?$', f.read(), flags=re.MULTILINE))
