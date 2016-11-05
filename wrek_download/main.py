@@ -105,11 +105,11 @@ def main():
             download_old_archive=True)
 
 if __name__ == '__main__':
-    main()
-    # w = auxf.create_whitelist(WHITELIST)
-    # z = parse_wrek_website()
-    # y = initialize_shows()
-    # p = y[0]
-    # het = [x for x in y if 'theory' in x.name][0]
-    # atm = [x for x in y if 'atmosph' in x.name][0]
+    w = auxf.create_whitelist(WHITELIST)
+    z = parse_wrek_website()
+    y = initialize_shows()
+    p = y[0]
+    het = [x for x in y if 'theory' in x.name][0]
+    atm = [x for x in y if 'atmosph' in x.name][0]
     # het.download('/tmp', download_old_archive=True)
+    main()
