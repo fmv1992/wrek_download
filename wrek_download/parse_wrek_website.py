@@ -1,8 +1,7 @@
-u"""
+"""
 Parse WREK website correctly identifying shows and their important attributes.
 
 Create a Show object with all meaningful information regarding that show.
-
 
 Classes:
     Show: WREK radio show with meaningful attributes.
@@ -139,7 +138,6 @@ class WREK_Show(object):
                         nr_line += 1
                         line = m3ufile.readline().replace('_old', '')
         return True
-
 
     def __repr__(self):
             return 'Radio show {0.name} aired on {0.weekday} beginning at {0.begin_time} and ending at {0.end_time}.'.format(self)

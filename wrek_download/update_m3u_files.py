@@ -7,8 +7,12 @@ deprected programs to the end.
 It moves the old, deprecated m3u files to archive_deprecated_folder.
 
 """
+
 # pylama:skip=1
 # try import httplib2
+# TODO: put logging where needed
+# TODO: Notificate user that a new show is available
+
 import httplib2
 import os
 import re

@@ -1,10 +1,9 @@
 """
-Created on Wed Oct 28 13:23:38 2015
-
-@author: monteiro
-
 Description: auxiliar functions for the main program.
 """
+
+# pylama:skip=1
+
 import datetime
 import time
 import os
@@ -80,8 +79,7 @@ def filename(link, m3ufilename, program_number, block_number):
 
 
 def is_blacklisted(x, l):
-    """Checks if string x is in any occurence of list l.
-    """
+    """Checks if string x is in any occurence of list l."""
     for entry in l:
         regex_search = re.search('(?<=[0-9]{8}\_[0-9][0-9]\_)[a-z_]+'
                                  '(?=[0-9][0-9]\.mp3)', x)

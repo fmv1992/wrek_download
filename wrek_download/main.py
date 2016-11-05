@@ -1,7 +1,7 @@
 """
 Created on Sun Oct 25 19:48:42 2015
 
-@author: monteiro
+author: monteiro
 
 Description: downloads archives from WREK Atlanta
 
@@ -15,6 +15,7 @@ For example if today is 25 october the last available day is
 The range of downloading days should be 12 october untill 22 october
 (inclusive).
 """
+# pylama:skip=1
 from datetime import datetime as dt
 import os
 import pathlib
