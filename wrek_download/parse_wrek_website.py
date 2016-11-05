@@ -47,6 +47,7 @@ WEEKDAYS = [ 'monday',
 # Each function should do one thing well:
 #   Download
 #   Move
+
 class WREK_Show(object):
     u"""WREK radio show object.
 
@@ -63,6 +64,11 @@ class WREK_Show(object):
         weekday (str): weekday in which the show is aired.
 
     """
+
+    # TODODONE: Function to check wheter the target file already exists
+    # TODO: Function to download one line of the m3u file
+    # TODO: Function to move this downloaded file
+    # TODO: Global functio to call all those three
 
     def __init__(self,
                  name,
@@ -81,31 +87,49 @@ class WREK_Show(object):
         self.weekday = weekday
 
 
-    def download(
+    def _check_output_file_exists(
             self,
-            destination_directory,
-            temporary_directory='/tmp',
-            download_old_archive=True):
-        u"""Download all the mp3 files in the m3u file.
-
-        Download the mp3 file contained in the m3u file using a temporary
-        directory and moving finished downloaded files to a destination
-        directory. Name them accordingly.
+            target_output_folder,
+            target_output_file):
+        """Checks wheter file to be downloaded already exists.
 
         Arguments:
-            destination_directory (str): the output folder for the downloaded
-            files.
-            temporary_directory (str): the temporary folder to hold the files
-            while they are being downloaded.
-            download_old_archive (bool): True to download files from the old
-            archive. False to download only files from the most recent week.
+            target_output_folder (str): path for the output folder.
+            target_output_file (str): path for the output folder.
 
         Returns:
-            bool: True if the function ran without errors.
+            bool: True if file already exists. False otherwise.
 
         """
+        if os.path.isfile(os.path.join(
+                target_output_folder, target_output_file)):
+            return True
+        else:
+            return False
 
-        def create_filename(self, download_old_archive):
+
+    def _download_one_file_from_m3u_file(
+            self,
+            target_output_folder,
+            dowload_url,
+            line_number_in_the_m3u_file
+            is_archive_file=False):
+        u"""Download the file from the URL given and name it accordingly.
+
+        Arguments:
+            target_output_folder (str): path for the output folder.
+            download_url (str): url to download.
+            line_number_in_the_m3u_file (int): line number in the m3u file.
+            Important because of file naming.
+
+        Returns:
+            bool: True if no errors happened during execution.
+
+        """
+        def _create_filename(
+                self,
+                line_number_in_the_m3u_file,
+                is_archive_file=is_archive_file):
             """Create a unique filename for each show based on its attributes.
 
             Create a filename of the format:
@@ -141,18 +165,88 @@ class WREK_Show(object):
             if now - aired_day <= threshold_to_skip_download:
                 # TODO: fix this for 'old' in name.
                 # logging.info('Skipping program {0} due to closeness with today\'s date'.format(self.name))
-                # return False
+                # return Fals
                 pass
-            if download_old_archive:
+            if is_archive_file:
                 aired_day -= 7 * datetime.timedelta(days=1)
 
             name = (str(aired_day.year)
                     + '{0:02d}'.format(aired_day.month)
                     + '{0:02d}'.format(aired_day.day) + '_'
                     + '{0:02d}'.format(self.show_number_in_day) + '_'
-                    + self.name + '_.mp3')
+                    + self.name + '_'
+                    + '{0:02d}.mp3'.format(line_number_in_the_m3u_file)
+                    + '.mp3')
+
             return name
 
+
+        if is_archive_file:
+            download_url = m3ufile.readline().replace('_old', '')
+
+
+    def _move_downloaded_file(
+            self,
+            downloaded_file_path,
+            destination_path):
+        u"""Move the downloaded file to the output folder.
+
+        Arguments:
+            downloaded_file_path (str): the path to the downloaded mp3 file.
+            destination_path (str): the output folder to put the download mp3
+            file.
+
+        Returns:
+            bool: True if function is execution is successful. False otherwise.
+
+        """
+
+
+    def download(
+            self,
+            destination_path,
+            temporary_directory,
+            download_old_archive=True):
+        u"""Download the mp3 files referenced by the m3u file of the program.
+
+        The procedure for downloading is the following:
+            1) Check wheter destination file exists. If True then skip this download.
+            2) Download the file.
+            3) Move the file.
+
+        Arguments:
+            (empty)
+
+        Returns:
+            bool: True if function runs successfully. False otherwise.
+
+        """
+
+
+
+    def OLD_download(
+            self,
+            destination_directory,
+            temporary_directory='/tmp',
+            download_old_archive=True):
+        u"""Download all the mp3 files in the m3u file.
+
+        Download the mp3 file contained in the m3u file using a temporary
+        directory and moving finished downloaded files to a destination
+        directory. Name them accordingly.
+
+        Arguments:
+            destination_directory (str): the output folder for the downloaded
+            files.
+            temporary_directory (str): the temporary folder to hold the files
+            while they are being downloaded.
+            download_old_archive (bool): True to download files from the old
+            archive. False to download only files from the most recent week.
+
+        Returns:
+            bool: True if the function ran without errors.
+
+        """
 
         destination_directory = os.path.abspath(destination_directory)
         if not os.path.isdir(destination_directory):
@@ -202,8 +296,6 @@ class WREK_Show(object):
                     nr_line += 1
                     line = m3ufile.readline().replace('_old', '')
         return True
-
-
 
 
 def parse_wrek_website(url='http://www.wrek.org/schedule/'):
@@ -265,8 +357,10 @@ def initialize_shows():
     """
     all_shows = []
     parsed_shows_data = parse_wrek_website()
+    # Adjusing m3u
     for index_day, weekday in enumerate(WEEKDAYS):
-        for index_program, program in enumerate(parsed_shows_data['names'][index_day]):
+        for index_program, program in enumerate(
+                parsed_shows_data['names'][index_day]):
             all_shows.append(
                 WREK_Show(
                     program,
