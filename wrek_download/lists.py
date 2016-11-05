@@ -4,9 +4,6 @@ Created on Wed Oct 28 13:24:56 2015
 @author: monteiro
 
 """
-
-
-
 # pylama:skip=1
 suffixes = ['AR.m3u', 'ATM_10000.m3u', 'ATM_20000.m3u', 'ATM_30000.m3u',
             'ATM_40000.m3u', 'ATM_50000.m3u', 'BAPR.m3u', 'BLBX.m3u',
