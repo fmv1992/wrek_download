@@ -56,6 +56,9 @@ TEMPORARY_FOLDER = os.path.abspath(str(args.temporaryfolder))
 OUTPUT_FOLDER = os.path.abspath(str(args.outputfolder))
 WHITELIST = os.path.abspath(str(args.whitelist))
 
+# Constants
+URL_WREK = 'http://www.wrek.org/schedule/'
+
 # Definitions and parsing specifications
 socket.setdefaulttimeout(15)
 if args.verbosity == 2:

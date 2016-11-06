@@ -16,23 +16,21 @@ import os
 import re
 import shutil
 import logging
+import main
 
 
-def main():
+def update_m3u_files():
     u"""Update the archive folder with the newest m3u files."""
     # Define all variables.
-    tmpdir = '/tmp'
-    url = 'http://www.wrek.org/schedule/'
     url_m3u = 'http://www.wrek.org/playlist.php/main/128kbs/current/'
-    archive_path = '../archive'
-    deprec_archive_path = '../archive/deprecated_m3u_files'
 
-    h = httplib2.Http(os.path.join(tmpdir, '.wrek_cache'))
-    _, content = h.request(url)
+    h = httplib2.Http(os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'))
+    _, content = h.request(main.URL_WREK)
     text = content.decode()
-    local_m3u_files_name = [f for f in os.listdir(archive_path) if
-                            (os.path.isfile(os.path.join(archive_path, f)) and
-                             (f.endswith('m3u')))]
+    local_m3u_files_name = [
+        f for f in os.listdir(main.ARCHIVE_FOLDER) if
+        (os.path.isfile(os.path.join(main.ARCHIVE_FOLDER, f)) and
+         (f.endswith('m3u')))]
 
     # Find the name of all m3u files that are 128kbps.
     remote_m3u_files_name = re.findall('(?<=current\/)[^>]*?\.m3u(?=\">128k<)',
@@ -46,7 +44,7 @@ def main():
     # Get local m3u files content.
     local_m3u_content = dict()
     for m3u in local_m3u_files_name:
-        with open(os.path.join(archive_path, m3u)) as f:
+        with open(os.path.join(main.ARCHIVE_FOLDER, m3u)) as f:
             local_m3u_content[m3u] = f.read()
 
     # Checks wheter local and remote files are the same. Moves local files that
@@ -55,8 +53,8 @@ def main():
         if local_m3u_content[m3u].replace('_old',
                                           '') != remote_m3u_content[m3u]:
             try:
-                shutil.move(os.path.join(archive_path, m3u),
-                            deprec_archive_path)
+                shutil.move(os.path.join(main.ARCHIVE_FOLDER, m3u),
+                            main.ARCHIVE_FOLDER)
             except shutil.Error as error01:
                 # if 'already exists' in error01:
                     # TODO: fix this.
@@ -69,11 +67,11 @@ def main():
 
     # Default behavior is to add extra programs and disregard spurious ones.
     for m3u in extra_programs:
-        with open(os.path.join(archive_path, m3u), 'wt') as f:
+        with open(os.path.join(main.ARCHIVE_FOLDER, m3u), 'wt') as f:
             f.write(remote_m3u_content[m3u].replace('.mp3', '_old.mp3'))
     # print(remote_m3u_content)
     # print(local_m3u_content)
     # print(extra_programs)
 
 if __name__ == '__main__':
-    main()
+    update_m3u_files()
