@@ -45,7 +45,26 @@ def create_whitelist(whitelistpath):
 
     """
     with open(whitelistpath, 'rt') as f:
-        return list(re.findall('^[^#\s]+?$', f.read(), flags=re.MULTILINE))
+        return re.findall('^[^#\s]+?$', f.read(), flags=re.MULTILINE)
+
+
+def shows_in_whitelist(whitelistpath):
+    u"""Show whitelist from whitelistpath. All entries are included.
+
+    In this function all programs will be read. The purpose of this function is
+    to allow for the computation of new shows.
+
+    Arguments:
+        whitelistpath (str): path to a text file containing the whitelisted
+        programs.
+
+    Returns:
+        list: list of all programs included in the whitelist.
+
+    """
+    with open(whitelistpath, 'rt') as f:
+        return sorted(
+            [x.replace('#', '').replace('\n', '') for x in f.readlines()])
 
 
 def check_output_file_exists(
@@ -66,6 +85,45 @@ def check_output_file_exists(
         return True
     else:
         return False
+
+
+def include_programs_in_whitelist(whitelistpath, list_of_programs_to_include):
+    u"""Include a list of new programs in the whitelist file.
+
+    The default behavior is to include them commented so they will not be
+    downloaded.
+
+    Arguments:
+        whitelistpath (str): path to a text file containing the whitelisted
+        programs.
+
+        list_of_programs_to_include (list): a list of program names to include
+        in the whitelist file.
+
+    Returns:
+        bool: True if function is successful. False otherwise.
+
+    """
+    with open(whitelistpath, 'r+') as f:
+        raw_programs = f.readlines()
+        f.seek(0)
+        program_is_commented = map(
+            lambda x: True if x.startswith('#') else False,
+            raw_programs)
+        programs_without_hash = [x.replace('#', '').replace('\n', '')
+                                 for x in raw_programs]
+        map_program_to_is_commented = dict(
+            zip(programs_without_hash, program_is_commented))
+        all_programs = sorted(programs_without_hash
+                              + list_of_programs_to_include)
+        all_programs_adj_to_hash = map(
+            lambda x: '#' + x if map_program_to_is_commented[x] else x,
+            all_programs)
+        print(''.join(raw_programs))
+        print('\n'.join(all_programs_adj_to_hash))
+        input()
+        # f.write('\n'.join(all_programs_adj_to_hash))
+        return True
 
 
 def move_downloaded_file(

@@ -17,6 +17,7 @@ import re
 import shutil
 import logging
 import main
+import ssl
 
 
 def update_m3u_files():
@@ -33,8 +34,21 @@ def update_m3u_files():
 
     """
     # Setting up HTTP object, WREK website as text and local m3u files.
-    h = httplib2.Http(os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'))
-    _, content = h.request(main.URL_WREK)
+    try:
+        h = httplib2.Http(os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'))
+        response, content = h.request(main.URL_WREK)
+        del response
+    except ssl.SSLError as sslerror:
+        if input('SSL CERTIFICATE ERROR: '
+                 'Do you want to continue? [y/n]\n') == 'y':
+            del h
+            h = httplib2.Http(
+                os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'),
+                disable_ssl_certificate_validation=True)
+            response, content = h.request(main.URL_WREK)
+            del response
+        else:
+            raise sslerror
     text = content.decode()
     local_m3u_file_names = [
         f for f in os.listdir(main.ARCHIVE_FOLDER) if
@@ -70,14 +84,26 @@ def update_m3u_files():
         # general as possible.
         if (local_m3u_content[m3u].replace('_old', '') !=
                 remote_m3u_content[m3u].replace('_old', '')):
+            logging.info('Local m3u file: %s is different from remote.',
+                         (m3u))
+            logging.debug('\nLocal file:\n%sRemote file:\n%s',
+                          local_m3u_content[m3u],
+                          remote_m3u_content[m3u])
             # Move local file to deprecated folder.
+            # TODO: check if this part of the code is working correctly.
             src = os.path.abspath(os.path.join(main.ARCHIVE_FOLDER, m3u))
+            dst = os.path.abspath(
+                os.path.join(main.DEPRECATED_ARCHIVE_FOLDER, m3u))
             shutil.move(
                 src,
-                os.path.abspath(
-                    os.path.join(main.DEPRECATED_ARCHIVE_FOLDER, m3u)))
+                dst)
+            logging.info('Moved: %s -> %s', src, dst)
             # Save remote file.
             with open(src, 'wt') as f:
+                logging.debug('Wrote remote %s with content:\n%s at %s.',
+                              m3u,
+                              remote_m3u_content[m3u],
+                              src)
                 f.write(remote_m3u_content[m3u])
 
     # Compares remote and local m3u files.

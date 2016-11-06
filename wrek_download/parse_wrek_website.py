@@ -210,6 +210,11 @@ class WREK_Show(object):
                             os.path.join(main.TEMPORARY_FOLDER, filename),
                             os.path.join(main.OUTPUT_FOLDER, filename))
 
+    def __repr__(self):
+        u"""Representation for this object."""
+        return ('Radio show {0.name} aired on {0.weekday} beginning '
+                'at {0.begin_time} and ending at {0.end_time}.'.format(self))
+
 
 def parse_wrek_website(url='http://www.wrek.org/schedule/'):
     u"""Parse WREK Atlanta website.
