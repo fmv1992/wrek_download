@@ -94,7 +94,7 @@ class WREK_Show(object):
             bool: True if no errors happened during execution.
 
         """
-        if is_archive_file:
+        if not is_archive_file:
             download_url = download_url.replace('_old', '')
 
         urllib.request.urlretrieve(

@@ -18,6 +18,7 @@ import logging
 import argparse
 import aux_functions as auxf
 import parse_wrek_website
+import update_m3u_files
 
 ROOT_FOLDER = os.path.dirname(
     os.path.dirname(
@@ -52,12 +53,15 @@ args = parser.parse_args()
 
 # Path specifications
 ARCHIVE_FOLDER = os.path.abspath(str(args.archivefolder))
+DEPRECATED_ARCHIVE_FOLDER = os.path.abspath(
+    os.path.join(ARCHIVE_FOLDER, 'deprecated_m3u_files'))
 TEMPORARY_FOLDER = os.path.abspath(str(args.temporaryfolder))
 OUTPUT_FOLDER = os.path.abspath(str(args.outputfolder))
 WHITELIST = os.path.abspath(str(args.whitelist))
 
 # Constants
 URL_WREK = 'http://www.wrek.org/schedule/'
+URL_M3U = 'http://www.wrek.org/playlist.php/main/128kbs/current/'
 
 # Definitions and parsing specifications
 socket.setdefaulttimeout(15)
@@ -86,4 +90,6 @@ def main():
             download_old_archive=True)
 
 if __name__ == '__main__':
+    update_m3u_files.update_m3u_files()
+    print('done')
     main()
