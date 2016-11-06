@@ -24,7 +24,8 @@ import logging
 import argparse
 import aux_functions as auxf
 from lists import week, program_names
-from parse_wrek_website import WREK_Show, parse_wrek_website, initialize_shows
+# from parse_wrek_website.parse_wrek_website import parse_wrek_website.WREK_Show, parse_wrek_website.parse_wrek_website, parse_wrek_website.initialize_shows
+import parse_wrek_website
 
 ROOT_FOLDER = os.path.dirname(
     os.path.dirname(
@@ -90,7 +91,7 @@ def main():
     auxf.wait_for_change_day()
 
     # Initialize shows.
-    all_wrek_shows = initialize_shows()
+    all_wrek_shows = parse_wrek_website.initialize_shows()
 
     # Initialize whitelist.
     whitelist = auxf.create_whitelist(WHITELIST)
@@ -107,8 +108,8 @@ def main():
 if __name__ == '__main__':
     main()
     w = auxf.create_whitelist(WHITELIST)
-    z = parse_wrek_website()
-    y = initialize_shows()
+    z = parse_wrek_website.parse_wrek_website()
+    y = parse_wrek_website.initialize_shows()
     p = y[0]
     # het = [x for x in y if 'theory' in x.name][0]
     # atm = [x for x in y if 'atmosph' in x.name][0]
