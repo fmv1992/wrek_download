@@ -64,8 +64,8 @@ args = parser.parse_args()
 # Path specifications
 # TODO use the pathlib library to open files etc.
 ARCHIVE_FOLDER = os.path.abspath(str(args.archivefolder))
-TMP_DIR = os.path.abspath(str(args.temporaryfolder))
-DEST_DIR = os.path.abspath(str(args.outputfolder))
+TEMPORARY_FOLDER = os.path.abspath(str(args.temporaryfolder))
+OUTPUT_FOLDER = os.path.abspath(str(args.outputfolder))
 WHITELIST = os.path.abspath(str(args.whitelist))
 
 # Definitions and parsing specifications
@@ -100,16 +100,16 @@ def main():
 
     for show in whitelisted_wrek_shows:
         show.download(
-            DEST_DIR,
-            temporary_directory=TMP_DIR,
+            OUTPUT_FOLDER,
+            temporary_directory=TEMPORARY_FOLDER,
             download_old_archive=True)
 
 if __name__ == '__main__':
     main()
-    # w = auxf.create_whitelist(WHITELIST)
-    # z = parse_wrek_website()
-    # y = initialize_shows()
-    # p = y[0]
+    w = auxf.create_whitelist(WHITELIST)
+    z = parse_wrek_website()
+    y = initialize_shows()
+    p = y[0]
     # het = [x for x in y if 'theory' in x.name][0]
     # atm = [x for x in y if 'atmosph' in x.name][0]
     # het.download('/tmp', download_old_archive=True)

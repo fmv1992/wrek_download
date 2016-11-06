@@ -25,6 +25,7 @@ References:
 """
 # pylama:skip=1
 # pylama:ignore=W:ignore=C101
+
 import httplib2
 import urllib
 import os
@@ -32,6 +33,8 @@ import re
 import string
 import datetime
 import logging
+# from main import main.ARCHIVE_FOLDER, main.OUTPUT_FOLDER, main.TEMPORARY_FOLDER
+import main
 
 WEEKDAYS = [ 'monday',
         'tuesday',
@@ -112,7 +115,7 @@ class WREK_Show(object):
             self,
             target_output_folder,
             dowload_url,
-            line_number_in_the_m3u_file
+            line_number_in_the_m3u_file,
             is_archive_file=False):
         u"""Download the file from the URL given and name it accordingly.
 
@@ -126,6 +129,59 @@ class WREK_Show(object):
             bool: True if no errors happened during execution.
 
         """
+
+        if is_archive_file:
+            download_url = m3ufile.readline().replace('_old', '')
+
+        urllib.request.urlretrieve(
+            download_url,
+            filename=_create_filename(line_number_in_the_m3u_file,
+                                        is_archive_file)
+        )
+
+        return True
+
+
+    def _move_downloaded_file(
+            self,
+            downloaded_file_path,
+            destination_path):
+        u"""Move the downloaded file to the output folder.
+
+        Arguments:
+            downloaded_file_path (str): the path to the downloaded mp3 file.
+            destination_path (str): the output folder to put the download mp3
+            file.
+
+        Returns:
+            bool: True if function is execution is successful. False otherwise.
+
+        """
+
+        os.rename(downloaded_file_path, destination_path)
+
+        return True
+
+
+    def download(
+            self,
+            temporary_directory='/tmp',
+            download_old_archive=True):
+        u"""Download the mp3 files referenced by the m3u file of the program.
+
+        The procedure for downloading is the following:
+            1) Check wheter destination file exists. If True then skip this download.
+            2) Download the file.
+            3) Move the file.
+
+        Arguments:
+            (empty)
+
+        Returns:
+            bool: True if function runs successfully. False otherwise.
+
+        """
+
         def _create_filename(
                 self,
                 line_number_in_the_m3u_file,
@@ -181,47 +237,31 @@ class WREK_Show(object):
             return name
 
 
-        if is_archive_file:
-            download_url = m3ufile.readline().replace('_old', '')
+        with open(
+                os.path.join(
+                    main.ARCHIVE_FOLDER,
+                    self.m3u_filename),
+                'rt') as m3ufile:
 
+            if download_old_archive:
+                iterate_over_new_and_old= (True, False)
+            else:
+                iterate_over_new_and_old = (True, )
 
-    def _move_downloaded_file(
-            self,
-            downloaded_file_path,
-            destination_path):
-        u"""Move the downloaded file to the output folder.
-
-        Arguments:
-            downloaded_file_path (str): the path to the downloaded mp3 file.
-            destination_path (str): the output folder to put the download mp3
-            file.
-
-        Returns:
-            bool: True if function is execution is successful. False otherwise.
-
-        """
-
-
-    def download(
-            self,
-            destination_path,
-            temporary_directory,
-            download_old_archive=True):
-        u"""Download the mp3 files referenced by the m3u file of the program.
-
-        The procedure for downloading is the following:
-            1) Check wheter destination file exists. If True then skip this download.
-            2) Download the file.
-            3) Move the file.
-
-        Arguments:
-            (empty)
-
-        Returns:
-            bool: True if function runs successfully. False otherwise.
-
-        """
-
+            for is_archive_file in iterate_over_new_and_old:
+                for line_number, m3uline in enumerate(m3ufile.readlines()):
+                    filename = _create_filename(line_number, is_archive_file)
+                    if _check_output_file_exists(
+                            main.ARCHIVE_FOLDER, filename):
+                        pass
+                    else:
+                        _download_one_file_from_m3u_file(
+                                main.TEMPORARY_FOLDER,
+                                line_number,
+                                is_archive_file)
+                    _move_downloaded_file(
+                        os.path.join(main.TEMPORARY_FOLDER, filename),
+                        os.path.join(main.OUTPUT_FOLDER, filename))
 
 
     def OLD_download(
