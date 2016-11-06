@@ -1,9 +1,5 @@
 """
-Created on Sun Oct 25 19:48:42 2015
-
-author: monteiro
-
-Description: downloads archives from WREK Atlanta
+Download archives from WREK Atlanta student radio.
 
 The idea is to create a timeline from the days prior to today (so today and
 the two previous days are excluded as a safeguard measure for the WREK to
@@ -15,15 +11,12 @@ For example if today is 25 october the last available day is
 The range of downloading days should be 12 october untill 22 october
 (inclusive).
 """
-# pylama:skip=1
-from datetime import datetime as dt
+
 import os
 import socket
-import urllib.request
 import logging
 import argparse
 import aux_functions as auxf
-from lists import week, program_names
 import parse_wrek_website
 
 ROOT_FOLDER = os.path.dirname(
@@ -43,26 +36,21 @@ parser.add_argument('--verbosity',
 parser.add_argument('--archivefolder',
                     help='Archive folder where the m3u files are.',
                     required=False,
-                    default=os.path.join(ROOT_FOLDER, 'archive')
-                    )
+                    default=os.path.join(ROOT_FOLDER, 'archive'))
 parser.add_argument('--temporaryfolder',
                     help='Temporary folder for ongoing downloads.',
                     required=False,
-                    default='/tmp'
-                    )
+                    default='/tmp')
 parser.add_argument('--outputfolder',
                     help='Output folder to put downloaded files when '
                          'finished.',
-                    required=True
-                    )
+                    required=True)
 parser.add_argument('--whitelist',
                     help='Selected programs to be downloaded.',
-                    required=True,
-                    )
+                    required=True,)
 args = parser.parse_args()
 
 # Path specifications
-# TODO use the pathlib library to open files etc.
 ARCHIVE_FOLDER = os.path.abspath(str(args.archivefolder))
 TEMPORARY_FOLDER = os.path.abspath(str(args.temporaryfolder))
 OUTPUT_FOLDER = os.path.abspath(str(args.outputfolder))
@@ -77,18 +65,9 @@ elif args.verbosity == 1:
     logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                         level=logging.ERROR, datefmt='%Y/%m/%d %H:%M')
 
+
 def main():
     """Main function to download music from WREK."""
-
-    # Wait for change day for them to update their data base.
-    #
-    # TODO: What is the purpose of this func?
-    # TODO: does this make sense? If we are offsetting the days (like waiting
-    # for two days to download) we are covered against this problem.
-    # TODO: maybe this could be called in between each downloads in case they
-    # take a long time.
-    auxf.wait_for_change_day()
-
     # Initialize shows.
     all_wrek_shows = parse_wrek_website.initialize_shows()
 

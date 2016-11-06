@@ -1,22 +1,28 @@
-"""
-Description: auxiliar functions for the main program.
-"""
-
-# pylama:skip=1
+"""Description: auxiliar functions for the main program."""
 
 import datetime
 import time
-import os
 import re
-import lists
+import os
 
 
 def wait_for_change_day():
-    """Waits if we are near the end of the day. This is done to
-    give the website time to update itself.
+    u"""Wait to change for the next day.
+
+    This function is deprecated and will be removed in future versions.
+    The idea behind wait_for_change_day is that WREK may update its website
+    during the change of the day but having a threshold of days already prevents
+    this problem of downloading a link which has been recently updated.
+
+    Arguments:
+        (empty)
+
+    Returns:
+        None.
+
     """
     if (datetime.datetime.now().hour == 23 and
-       datetime.datetime.now().minute >= 50):
+            datetime.datetime.now().minute >= 50):
         print('Waiting for day to change')
         time.sleep(15*60)
         return True
@@ -25,89 +31,57 @@ def wait_for_change_day():
     return None
 
 
-def date_is_in_range(date, margin=2):
-    """Checks if the date given is within the range -14 until -margin
-    from today.
-    The margin is given to be sure that the website is properly updated.
+def create_whitelist(whitelistpath):
+    u"""Create a whitelist from whitelistpath.
+
+    Programs to be ignored should have their lines starting with a comment (#).
+
+    Arguments:
+        whitelistpath (str): path to a text file containing the whitelisted
+        programs.
+
+    Returns:
+        list: list of all whitelisted programs.
+
     """
-    now = datetime.datetime.now()
-    if (datetime.datetime(now.year, now.month, now.day)
-            - date > datetime.timedelta(days=(margin))):
+    with open(whitelistpath, 'rt') as f:
+        return list(re.findall('^[^#\s]+?$', f.read(), flags=re.MULTILINE))
+
+
+def check_output_file_exists(
+        target_output_folder,
+        target_output_file):
+    """Check wheter file to be downloaded already exists.
+
+    Arguments:
+        target_output_folder (str): path for the output folder.
+        target_output_file (str): path for the output folder.
+
+    Returns:
+        bool: True if file already exists. False otherwise.
+
+    """
+    if os.path.isfile(os.path.join(
+            target_output_folder, target_output_file)):
         return True
     else:
         return False
-    return None
 
 
-def return_link(link, date):
-    """Returns the link according to the necessity of replacing 'main' with
-    'previous' when accessing WREK's archive.
-    """
-    now = datetime.datetime.now()
-    timedelta = now - date
-    if timedelta.days <= now.weekday():
-        pass
-    else:
-        link = link.replace('main', 'previous')
-    return link
-
-
-def filename(link, m3ufilename, program_number, block_number):
-    """Creates the filename with:
-    yyyymmdd_pn_programname_bn.mp3
-    """
-    now = datetime.datetime.now()
-    for day in lists.week:
-        if m3ufilename in day:
-            weekday = lists.week.index(day)
-    if weekday > now.weekday():
-        new_date = now + datetime.timedelta(
-            days=(-7 + weekday - now.weekday()))
-    else:
-        new_date = now + datetime.timedelta(days=-(now.weekday() - weekday))
-    if '_old' in link:
-        new_date = new_date + datetime.timedelta(days=-7)
-    prg_name = lists.program_names[re.search('[A-Z]{2,4}',
-                                             m3ufilename).group(0)]
-    name = str(str(new_date.year)
-               + str('{0:02d}'.format(new_date.month))
-               + str('{0:02d}'.format(new_date.day)
-                     + '_' + str('{0:02d}'.format(program_number)) + '_'
-                     + prg_name + '_' + str('{0:02d}'.format(block_number))
-                     + '.mp3'))
-    return name
-
-
-def is_blacklisted(x, l):
-    """Checks if string x is in any occurence of list l."""
-    for entry in l:
-        regex_search = re.search('(?<=[0-9]{8}\_[0-9][0-9]\_)[a-z_]+'
-                                 '(?=[0-9][0-9]\.mp3)', x)
-        if regex_search:
-            if str(entry + '_') == regex_search.group(0):
-                return True
-    return False
-
-
-def is_whitelisted(entry, list_of_whitelist_patterns):
-    """Check if entry is on whitelist file.
+def move_downloaded_file(
+        downloaded_file_path,
+        destination_path):
+    u"""Move the downloaded file to the output folder.
 
     Arguments:
-        entry (str): WREK's program name.
-        list_of_whitelist_patterns (list): list of whitelisted programs' names.
+        downloaded_file_path (str): the path to the downloaded mp3 file.
+        destination_path (str): the output folder to put the download mp3
+        file.
 
     Returns:
-        bool: True if program is in whitelist. False otherwise.
+        bool: True if function is execution is successful. False otherwise.
 
     """
-    for pattern in list_of_whitelist_patterns:
+    os.rename(downloaded_file_path, destination_path)
 
-        if regex_search:
-            if str(entry + '_') == regex_search.group(0):
-                return True
-    return False
-
-
-def create_whitelist(whitelistpath):
-    with open(whitelistpath, 'rt') as f:
-        return list(re.findall('^[^#\s]+?$', f.read(), flags=re.MULTILINE))
+    return True

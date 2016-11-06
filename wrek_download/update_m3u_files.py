@@ -8,11 +8,9 @@ It moves the old, deprecated m3u files to archive_deprecated_folder.
 
 """
 
-# pylama:skip=1
-# try import httplib2
+# pylama:ignore=W0611,W0511
 # TODO: put logging where needed
 # TODO: Notificate user that a new show is available
-
 import httplib2
 import os
 import re
@@ -30,7 +28,7 @@ def main():
     deprec_archive_path = '../archive/deprecated_m3u_files'
 
     h = httplib2.Http(os.path.join(tmpdir, '.wrek_cache'))
-    response, content = h.request(url)
+    _, content = h.request(url)
     text = content.decode()
     local_m3u_files_name = [f for f in os.listdir(archive_path) if
                             (os.path.isfile(os.path.join(archive_path, f)) and
@@ -57,20 +55,17 @@ def main():
         if local_m3u_content[m3u].replace('_old',
                                           '') != remote_m3u_content[m3u]:
             try:
-                shutil.move(os.path.join(archive_path, m3u), deprec_archive_path)
+                shutil.move(os.path.join(archive_path, m3u),
+                            deprec_archive_path)
             except shutil.Error as error01:
                 # if 'already exists' in error01:
                     # TODO: fix this.
                     # logging.info('Shutil error:', error01)
-                    print(error01)
-                    pass
-
+                print(error01)
 
     # Compares remote and local m3u files.
-    extra_programs = set(remote_m3u_content.keys()) \
-                     - set(local_m3u_content.keys())
-    # spurious_programs = set(
-        # local_m3u_content.keys()) - set(remote_m3u_content.keys())
+    extra_programs = (set(remote_m3u_content.keys())
+                      - set(local_m3u_content.keys()))
 
     # Default behavior is to add extra programs and disregard spurious ones.
     for m3u in extra_programs:
