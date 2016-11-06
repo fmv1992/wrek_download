@@ -24,7 +24,6 @@ import logging
 import argparse
 import aux_functions as auxf
 from lists import week, program_names
-# from parse_wrek_website.parse_wrek_website import parse_wrek_website.WREK_Show, parse_wrek_website.parse_wrek_website, parse_wrek_website.initialize_shows
 import parse_wrek_website
 
 ROOT_FOLDER = os.path.dirname(
@@ -101,16 +100,8 @@ def main():
 
     for show in whitelisted_wrek_shows:
         show.download(
-            OUTPUT_FOLDER,
             temporary_directory=TEMPORARY_FOLDER,
             download_old_archive=True)
 
 if __name__ == '__main__':
     main()
-    w = auxf.create_whitelist(WHITELIST)
-    z = parse_wrek_website.parse_wrek_website()
-    y = parse_wrek_website.initialize_shows()
-    p = y[0]
-    # het = [x for x in y if 'theory' in x.name][0]
-    # atm = [x for x in y if 'atmosph' in x.name][0]
-    # het.download('/tmp', download_old_archive=True)

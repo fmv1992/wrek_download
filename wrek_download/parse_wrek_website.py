@@ -33,7 +33,6 @@ import re
 import string
 import datetime
 import logging
-# from main import main.ARCHIVE_FOLDER, main.OUTPUT_FOLDER, main.TEMPORARY_FOLDER
 import main
 
 WEEKDAYS = [ 'monday',
@@ -114,7 +113,7 @@ class WREK_Show(object):
     def _download_one_file_from_m3u_file(
             self,
             target_output_folder,
-            dowload_url,
+            download_url,
             line_number_in_the_m3u_file,
             is_archive_file=False):
         u"""Download the file from the URL given and name it accordingly.
@@ -131,12 +130,15 @@ class WREK_Show(object):
         """
 
         if is_archive_file:
-            download_url = m3ufile.readline().replace('_old', '')
+            download_url = download_url.replace('_old', '')
 
         urllib.request.urlretrieve(
             download_url,
-            filename=_create_filename(line_number_in_the_m3u_file,
-                                        is_archive_file)
+            filename=
+                os.path.join(
+                    main.TEMPORARY_FOLDER,
+                    self._create_filename(line_number_in_the_m3u_file,
+                                          is_archive_file))
         )
 
         return True
@@ -163,6 +165,61 @@ class WREK_Show(object):
         return True
 
 
+    def _create_filename(
+            self,
+            line_number_in_the_m3u_file,
+            is_archive_file):
+        """Create a unique filename for each show based on its attributes.
+
+        Create a filename of the format:
+            yyyymmdd_pn_programname_bn.mp3
+        where:
+            'yyyy' is the year of the program.
+            'mm' is the month of the program.
+            'dd' is the day of the program.
+            'pn' is the program number of the program in that day. 00 for
+            the first program.
+            'programname' is the program name.
+            'bn' is the block number. WREK's show are composed of half hour
+            blocks so a full day would have 2 * 24 = 48 blocks
+
+        Arguments:
+            download_old_archive (bool): True to download files from the
+            old archive. False to download only files from the most
+            recent week.
+
+        Returns:
+            str: the show's name.
+
+        """
+        now = datetime.datetime.now()
+        aired_day = datetime.datetime.now()
+        # The following variable gives a safety margin to skip downloads
+        # occuring too close to today's date. WREK might not update their
+        # website so often.
+        threshold_to_skip_download = datetime.timedelta(2)  # In days.
+
+        while aired_day.weekday() != WEEKDAYS.index(self.weekday):
+            aired_day -= datetime.timedelta(days=1)
+        if now - aired_day <= threshold_to_skip_download:
+            # TODO: fix this for 'old' in name.
+            # logging.info('Skipping program {0} due to closeness with today\'s date'.format(self.name))
+            # return Fals
+            pass
+        if is_archive_file:
+            aired_day -= 7 * datetime.timedelta(days=1)
+
+        name = (str(aired_day.year)
+                + '{0:02d}'.format(aired_day.month)
+                + '{0:02d}'.format(aired_day.day) + '_'
+                + '{0:02d}'.format(self.show_number_in_day) + '_'
+                + self.name + '_'
+                + '{0:02d}.mp3'.format(line_number_in_the_m3u_file)
+               )
+
+        return name
+
+
     def download(
             self,
             temporary_directory='/tmp',
@@ -182,60 +239,6 @@ class WREK_Show(object):
 
         """
 
-        def _create_filename(
-                self,
-                line_number_in_the_m3u_file,
-                is_archive_file=is_archive_file):
-            """Create a unique filename for each show based on its attributes.
-
-            Create a filename of the format:
-                yyyymmdd_pn_programname_bn.mp3
-            where:
-                'yyyy' is the year of the program.
-                'mm' is the month of the program.
-                'dd' is the day of the program.
-                'pn' is the program number of the program in that day. 00 for
-                the first program.
-                'programname' is the program name.
-                'bn' is the block number. WREK's show are composed of half hour
-                blocks so a full day would have 2 * 24 = 48 blocks
-
-            Arguments:
-                download_old_archive (bool): True to download files from the
-                old archive. False to download only files from the most
-                recent week.
-
-            Returns:
-                str: the show's name.
-
-            """
-            now = datetime.datetime.now()
-            aired_day = datetime.datetime.now()
-            # The following variable gives a safety margin to skip downloads
-            # occuring too close to today's date. WREK might not update their
-            # website so often.
-            threshold_to_skip_download = datetime.timedelta(2)  # In days.
-
-            while aired_day.weekday() != WEEKDAYS.index(self.weekday):
-                aired_day -= datetime.timedelta(days=1)
-            if now - aired_day <= threshold_to_skip_download:
-                # TODO: fix this for 'old' in name.
-                # logging.info('Skipping program {0} due to closeness with today\'s date'.format(self.name))
-                # return Fals
-                pass
-            if is_archive_file:
-                aired_day -= 7 * datetime.timedelta(days=1)
-
-            name = (str(aired_day.year)
-                    + '{0:02d}'.format(aired_day.month)
-                    + '{0:02d}'.format(aired_day.day) + '_'
-                    + '{0:02d}'.format(self.show_number_in_day) + '_'
-                    + self.name + '_'
-                    + '{0:02d}.mp3'.format(line_number_in_the_m3u_file)
-                    + '.mp3')
-
-            return name
-
 
         with open(
                 os.path.join(
@@ -250,16 +253,17 @@ class WREK_Show(object):
 
             for is_archive_file in iterate_over_new_and_old:
                 for line_number, m3uline in enumerate(m3ufile.readlines()):
-                    filename = _create_filename(line_number, is_archive_file)
-                    if _check_output_file_exists(
+                    filename = self._create_filename(line_number, is_archive_file)
+                    if self._check_output_file_exists(
                             main.ARCHIVE_FOLDER, filename):
                         pass
                     else:
-                        _download_one_file_from_m3u_file(
+                        self._download_one_file_from_m3u_file(
                                 main.TEMPORARY_FOLDER,
+                                m3uline,
                                 line_number,
                                 is_archive_file)
-                    _move_downloaded_file(
+                    self._move_downloaded_file(
                         os.path.join(main.TEMPORARY_FOLDER, filename),
                         os.path.join(main.OUTPUT_FOLDER, filename))
 
