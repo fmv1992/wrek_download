@@ -4,6 +4,7 @@ import datetime
 import time
 import re
 import os
+import logging
 
 
 def wait_for_change_day():
@@ -105,7 +106,8 @@ def include_programs_in_whitelist(whitelistpath, list_of_programs_to_include):
 
     """
     with open(whitelistpath, 'r+') as f:
-        raw_programs = f.readlines()
+        raw_programs = (f.readlines()
+                        + ['#' + x for x in list_of_programs_to_include])
         f.seek(0)
         program_is_commented = map(
             lambda x: True if x.startswith('#') else False,
@@ -114,16 +116,15 @@ def include_programs_in_whitelist(whitelistpath, list_of_programs_to_include):
                                  for x in raw_programs]
         map_program_to_is_commented = dict(
             zip(programs_without_hash, program_is_commented))
-        all_programs = sorted(programs_without_hash
-                              + list_of_programs_to_include)
+        all_programs = sorted(programs_without_hash)
         all_programs_adj_to_hash = map(
             lambda x: '#' + x if map_program_to_is_commented[x] else x,
             all_programs)
-        print(''.join(raw_programs))
-        print('\n'.join(all_programs_adj_to_hash))
-        input()
-        # f.write('\n'.join(all_programs_adj_to_hash))
-        return True
+        f.write('\n'.join(all_programs_adj_to_hash))
+        f.truncate()
+        logging.debug('Included the following programs in whitelist file:\n%s',
+                      '\n'.join(list_of_programs_to_include))
+    return True
 
 
 def move_downloaded_file(
