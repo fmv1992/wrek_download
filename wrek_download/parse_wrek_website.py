@@ -33,6 +33,7 @@ import datetime
 # import logging
 import main
 import aux_functions as auxf
+import logging
 
 WEEKDAYS = ['monday',
             'tuesday',
@@ -209,6 +210,9 @@ class WREK_Show(object):
                         auxf.move_downloaded_file(
                             os.path.join(main.TEMPORARY_FOLDER, filename),
                             os.path.join(main.OUTPUT_FOLDER, filename))
+                        logging.info('\nDownloaded show %s.',
+                                     filename)
+
 
     def __repr__(self):
         u"""Representation for this object."""

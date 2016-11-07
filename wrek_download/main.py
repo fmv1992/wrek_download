@@ -15,6 +15,7 @@ The range of downloading days should be 12 october untill 22 october
 # TODO: add flexibility for not to depent of external libraries (urllib if I'm
 # not wrong)
 # TODO: download an entire week of WREK and check if there are 48 files.
+# TODO: create a notify flag to permanently notify the user of a new program.
 import os
 import socket
 import logging
@@ -55,6 +56,7 @@ parser.add_argument('--whitelist',
 parser.add_argument('--batch',
                     help='If present skip any prompt and follow some '
                     'default/sane option.',
+                    action="store_true",
                     required=False,
                     default=False)
 args = parser.parse_args()
@@ -109,23 +111,26 @@ def main():
         - set(auxf.shows_in_whitelist(WHITELIST_FILE)))
     if set_of_new_programs:
         logging.info('New shows not included in the whitelist:\n%s',
-                     sorted(set_of_new_programs))
+                     '\n'.join(sorted(set_of_new_programs)))
         # Here the default is to include the new program in a comment in the
         # whitelist file and create a file warning for new programs.
         if BATCH_MODE:
-            pass
+            auxf.include_programs_in_whitelist(
+                WHITELIST_FILE,
+                sorted(set_of_new_programs))
         else:
-            pass
-        auxf.include_programs_in_whitelist(
-            WHITELIST_FILE,
-            sorted(set_of_new_programs))
+            if input('Do you want to include the new programs in your '
+                     'whitelist file? [y/n]\n') == 'y':
+                auxf.include_programs_in_whitelist(
+                    WHITELIST_FILE,
+                    sorted(set_of_new_programs))
 
     for show in whitelisted_wrek_shows:
         show.download(
             temporary_directory=TEMPORARY_FOLDER,
             download_old_archive=True)
-        logging.info('\nDownloaded show %s.', (
-            str(show)))
+        logging.debug('Downloaded all files for show %s.',
+                      str(show))
 
 
 if __name__ == '__main__':

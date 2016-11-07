@@ -39,16 +39,19 @@ def update_m3u_files():
         response, content = h.request(main.URL_WREK)
         del response
     except ssl.SSLError as sslerror:
-        if input('SSL CERTIFICATE ERROR: '
-                 'Do you want to continue? [y/n]\n') == 'y':
-            del h
-            h = httplib2.Http(
-                os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'),
-                disable_ssl_certificate_validation=True)
-            response, content = h.request(main.URL_WREK)
-            del response
-        else:
+        if main.BATCH_MODE:
             raise sslerror
+        else:
+            if input('SSL CERTIFICATE ERROR: '
+                     'Do you want to continue? [y/n]\n') == 'y':
+                del h
+                h = httplib2.Http(
+                    os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'),
+                    disable_ssl_certificate_validation=True)
+                response, content = h.request(main.URL_WREK)
+                del response
+            else:
+                raise sslerror
     text = content.decode()
     local_m3u_file_names = [
         f for f in os.listdir(main.ARCHIVE_FOLDER) if
