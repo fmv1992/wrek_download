@@ -98,13 +98,23 @@ class WREK_Show(object):
         if not is_archive_file:
             download_url = download_url.replace('_old', '')
 
-        urllib.request.urlretrieve(
-            download_url,
-            filename=os.path.join(
-                main.TEMPORARY_FOLDER,
-                self._create_filename(line_number_in_the_m3u_file,
-                                      is_archive_file))
-        )
+        try:
+            urllib.request.urlretrieve(
+                download_url,
+                filename=os.path.join(
+                    main.TEMPORARY_FOLDER,
+                    self._create_filename(line_number_in_the_m3u_file,
+                                        is_archive_file))
+            )
+        except urllib.error.HTTPError as error01:
+            # TODO: info is not the best choice here
+            # TODO: logging is not correct and error's cause is not investigated
+            # yet
+            logging.info(
+                'Could not download {0} due to {1}'.format(
+                    self.__repr__(),
+                    error01))
+            return False
 
         return True
 
@@ -202,16 +212,19 @@ class WREK_Show(object):
                             main.OUTPUT_FOLDER, filename):
                         pass
                     else:
-                        self._download_one_file_from_m3u_file(
-                            main.TEMPORARY_FOLDER,
-                            m3uline,
-                            line_number,
-                            is_archive_file)
-                        auxf.move_downloaded_file(
-                            os.path.join(main.TEMPORARY_FOLDER, filename),
-                            os.path.join(main.OUTPUT_FOLDER, filename))
-                        logging.info('\nDownloaded show %s.',
-                                     filename)
+                        if self._download_one_file_from_m3u_file(
+                                main.TEMPORARY_FOLDER,
+                                m3uline,
+                                line_number,
+                                is_archive_file):
+                            auxf.move_downloaded_file(
+                                os.path.join(main.TEMPORARY_FOLDER, filename),
+                                os.path.join(main.OUTPUT_FOLDER, filename))
+                            logging.info('\nDownloaded show %s.',
+                                        filename)
+                            return True
+                        else:
+                            return False
 
 
     def __repr__(self):
