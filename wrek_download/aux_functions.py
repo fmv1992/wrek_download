@@ -5,6 +5,7 @@ import time
 import re
 import os
 import logging
+import shutil
 
 
 def wait_for_change_day():
@@ -141,6 +142,5 @@ def move_downloaded_file(
         bool: True if function is execution is successful. False otherwise.
 
     """
-    os.rename(downloaded_file_path, destination_path)
-
+    shutil.move(downloaded_file_path, destination_path)
     return True

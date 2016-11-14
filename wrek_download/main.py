@@ -70,6 +70,17 @@ OUTPUT_FOLDER = os.path.abspath(args.outputfolder)
 WHITELIST_FILE = os.path.abspath(args.whitelist)
 BATCH_MODE = args.batch
 
+# Test if target folders exist and whitelist file.
+LIST_OF_ARGS_FOLDERS = [ARCHIVE_FOLDER, DEPRECATED_ARCHIVE_FOLDER,
+                        TEMPORARY_FOLDER, OUTPUT_FOLDER]
+for one_folder in LIST_OF_ARGS_FOLDERS:
+    if not os.path.isdir(one_folder):
+        raise FileNotFoundError('One of the arguments: \'{0}\' does '
+                                'not exist.'.format(one_folder))
+if not os.path.isfile(WHITELIST_FILE):
+    raise FileNotFoundError('Whitelist file \'{0}\' does not exist.'.format(
+        WHITELIST_FILE))
+
 # Constants
 URL_WREK = 'http://www.wrek.org/schedule/'
 URL_M3U = 'http://www.wrek.org/playlist.php/main/128kbs/current/'
