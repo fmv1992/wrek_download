@@ -36,6 +36,8 @@ def update_m3u_files():
     # Setting up HTTP object, WREK website as text and local m3u files.
     try:
         h = httplib2.Http(os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'))
+        logging.debug('Contacting WREK website at %s',
+                      main.URL_WREK)
         response, content = h.request(main.URL_WREK)
         del response
     except ssl.SSLError as sslerror:
@@ -66,8 +68,9 @@ def update_m3u_files():
     remote_m3u_content = dict()
     for m3u in remote_m3u_file_names:
         remote_m3u_content[m3u] = h.request(main.URL_M3U + m3u)[1].decode()
-        # Put old suffix in every mp3 file as all the programs supposes that
-        # they come with this prefix
+    # logging.debug('Got all remote m3u file contents.')
+    # Put old suffix in every mp3 file as all the programs supposes that
+    # they come with this prefix
     # TODO: this regex needs testing
     # We are putting old in all remote files in order to uniformize our archive
     # and because the program suposes that files have '_old' in them.
@@ -112,6 +115,9 @@ def update_m3u_files():
     # Compares remote and local m3u files.
     extra_programs = (set(remote_m3u_content.keys())
                       - set(local_m3u_content.keys()))
+    if extra_programs:
+        logging.debug('Got some extra programs: \n\t%s',
+                      '\n\t'.join(sorted(extra_programs)))
 
     # Default behavior is to add extra programs and disregard spurious ones.
     for m3u in extra_programs:
