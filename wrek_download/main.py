@@ -129,7 +129,7 @@ def main():
         show.download(
             temporary_directory=TEMPORARY_FOLDER,
             download_old_archive=True)
-        logging.debug('Downloaded all files for show %s.',
+        logging.debug('Downloaded all files for show %s',
                       str(show))
 
 

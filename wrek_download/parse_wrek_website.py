@@ -97,15 +97,17 @@ class WREK_Show(object):
         """
         if not is_archive_file:
             download_url = download_url.replace('_old', '')
-
+        filename = self._create_filename(line_number_in_the_m3u_file,
+                                         is_archive_file)
         try:
             urllib.request.urlretrieve(
                 download_url,
                 filename=os.path.join(
                     main.TEMPORARY_FOLDER,
-                    self._create_filename(line_number_in_the_m3u_file,
-                                        is_archive_file))
+                    filename)
             )
+            logging.debug('Downloaded file %s.',
+                          filename)
         except urllib.error.HTTPError as error01:
             # TODO: info is not the best choice here
             # TODO: logging is not correct and error's cause is not investigated
@@ -115,7 +117,6 @@ class WREK_Show(object):
                     self.__repr__(),
                     error01))
             return False
-
         return True
 
     def _create_filename(
@@ -210,8 +211,11 @@ class WREK_Show(object):
                         continue
                     if auxf.check_output_file_exists(
                             main.OUTPUT_FOLDER, filename):
-                        pass
+                        logging.debug('File %s exists.',
+                                     filename)
                     else:
+                        logging.debug('File %s does not exist.',
+                                     filename)
                         if self._download_one_file_from_m3u_file(
                                 main.TEMPORARY_FOLDER,
                                 m3uline,
@@ -225,6 +229,7 @@ class WREK_Show(object):
                             return True
                         else:
                             return False
+            return True
 
 
     def __repr__(self):
