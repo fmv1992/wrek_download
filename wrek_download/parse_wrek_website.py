@@ -226,7 +226,6 @@ class WREK_Show(object):
                                 os.path.join(main.OUTPUT_FOLDER, filename))
                             logging.info('\nDownloaded show %s.',
                                         filename)
-                            return True
                         else:
                             return False
             return True
