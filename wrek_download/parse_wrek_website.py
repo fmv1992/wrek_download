@@ -106,8 +106,6 @@ class WREK_Show(object):
                     main.TEMPORARY_FOLDER,
                     filename)
             )
-            logging.debug('Downloaded file %s.',
-                          filename)
         except urllib.error.HTTPError as error01:
             # TODO: info is not the best choice here
             # TODO: logging is not correct and error's cause is not investigated
