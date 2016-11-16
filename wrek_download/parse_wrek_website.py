@@ -116,6 +116,8 @@ class WREK_Show(object):
                 'Could not download {0} due to {1}'.format(
                     self.__repr__(),
                     error01))
+            logging.debug(
+                'Failed with URL: %s', download_url)
             return False
         return True
 
@@ -224,7 +226,7 @@ class WREK_Show(object):
                             auxf.move_downloaded_file(
                                 os.path.join(main.TEMPORARY_FOLDER, filename),
                                 os.path.join(main.OUTPUT_FOLDER, filename))
-                            logging.info('\nDownloaded show %s.',
+                            logging.info('Downloaded show %s.',
                                         filename)
                         else:
                             return False
