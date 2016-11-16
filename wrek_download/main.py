@@ -86,6 +86,9 @@ URL_WREK = 'http://www.wrek.org/schedule/'
 URL_M3U = 'http://www.wrek.org/playlist.php/main/128kbs/current/'
 
 # Definitions and parsing specifications
+# TODO: format according to
+# file:///home/monteiro/bin/python/python_and_packages_documentation/python_3_4_3/howto/logging-cookbook.html#use-of-alternative-formatting-styles
+# https://stackoverflow.com/questions/7771912/how-to-right-align-level-field-in-python-logging-formatter
 socket.setdefaulttimeout(15)
 if args.verbosity == 1:
     logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s',
