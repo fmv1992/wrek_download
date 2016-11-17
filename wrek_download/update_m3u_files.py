@@ -122,7 +122,7 @@ def update_m3u_files():
     # Default behavior is to add extra programs and disregard spurious ones.
     for m3u in extra_programs:
         with open(os.path.join(main.ARCHIVE_FOLDER, m3u), 'wt') as f:
-            f.write(remote_m3u_content[m3u])
+            f.write(remote_m3u_content[m3u].replace('.mp3', '_old.mp3'))
     return True
 
 if __name__ == '__main__':
