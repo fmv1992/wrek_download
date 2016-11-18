@@ -1,9 +1,5 @@
 """
-Created on Sun Oct 25 19:48:42 2015
-
-author: monteiro
-
-Description: downloads archives from WREK Atlanta
+Download archives from WREK Atlanta student radio.
 
 The idea is to create a timeline from the days prior to today (so today and
 the two previous days are excluded as a safeguard measure for the WREK to
@@ -15,16 +11,18 @@ For example if today is 25 october the last available day is
 The range of downloading days should be 12 october untill 22 october
 (inclusive).
 """
-# pylama:skip=1
-from datetime import datetime as dt
+
+# TODO: add flexibility for not to depent of external libraries (urllib if I'm
+# not wrong)
+# TODO: download an entire week of WREK and check if there are 48 files.
+# TODO: create a notify flag to permanently notify the user of a new program.
 import os
 import socket
-import urllib.request
 import logging
 import argparse
 import aux_functions as auxf
-from lists import week, program_names
-from parse_wrek_website import WREK_Show, parse_wrek_website, initialize_shows
+import parse_wrek_website
+import update_m3u_files
 
 ROOT_FOLDER = os.path.dirname(
     os.path.dirname(
@@ -38,78 +36,117 @@ parser.add_argument('--verbose',
                     default=False)
 parser.add_argument('--verbosity',
                     help='Sets the verbosity of the program. '
-                         'Use 1 for error and 2 for info.',
+                         'Use 1 for info, 2 for debugging and 3 for errors.',
                     type=int, default=1)
 parser.add_argument('--archivefolder',
                     help='Archive folder where the m3u files are.',
                     required=False,
-                    default=os.path.join(ROOT_FOLDER, 'archive')
-                    )
+                    default=os.path.join(ROOT_FOLDER, 'archive'))
 parser.add_argument('--temporaryfolder',
                     help='Temporary folder for ongoing downloads.',
                     required=False,
-                    default='/tmp'
-                    )
+                    default='/tmp')
 parser.add_argument('--outputfolder',
                     help='Output folder to put downloaded files when '
                          'finished.',
-                    required=True
-                    )
+                    required=True)
 parser.add_argument('--whitelist',
                     help='Selected programs to be downloaded.',
-                    required=True,
-                    )
+                    required=True,)
+parser.add_argument('--batch',
+                    help='If present skip any prompt and follow some '
+                    'default/sane option.',
+                    action="store_true",
+                    required=False,
+                    default=False)
 args = parser.parse_args()
 
 # Path specifications
-# TODO use the pathlib library to open files etc.
-ARCHIVE_FOLDER = os.path.abspath(str(args.archivefolder))
-TMP_DIR = os.path.abspath(str(args.temporaryfolder))
-DEST_DIR = os.path.abspath(str(args.outputfolder))
-WHITELIST = os.path.abspath(str(args.whitelist))
+ARCHIVE_FOLDER = os.path.abspath(args.archivefolder)
+DEPRECATED_ARCHIVE_FOLDER = os.path.abspath(
+    os.path.join(ARCHIVE_FOLDER, 'deprecated_m3u_files'))
+TEMPORARY_FOLDER = os.path.abspath(args.temporaryfolder)
+OUTPUT_FOLDER = os.path.abspath(args.outputfolder)
+WHITELIST_FILE = os.path.abspath(args.whitelist)
+BATCH_MODE = args.batch
+
+# Test if target folders exist and whitelist file.
+LIST_OF_ARGS_FOLDERS = [ARCHIVE_FOLDER, DEPRECATED_ARCHIVE_FOLDER,
+                        TEMPORARY_FOLDER, OUTPUT_FOLDER]
+for one_folder in LIST_OF_ARGS_FOLDERS:
+    if not os.path.isdir(one_folder):
+        raise FileNotFoundError('One of the arguments: \'{0}\' does '
+                                'not exist.'.format(one_folder))
+if not os.path.isfile(WHITELIST_FILE):
+    raise FileNotFoundError('Whitelist file \'{0}\' does not exist.'.format(
+        WHITELIST_FILE))
+
+# Constants
+URL_WREK = 'http://www.wrek.org/schedule/'
+URL_M3U = 'http://www.wrek.org/playlist.php/main/128kbs/current/'
 
 # Definitions and parsing specifications
+# TODO: format according to
+# file:///home/monteiro/bin/python/python_and_packages_documentation/python_3_4_3/howto/logging-cookbook.html#use-of-alternative-formatting-styles
+# https://stackoverflow.com/questions/7771912/how-to-right-align-level-field-in-python-logging-formatter
 socket.setdefaulttimeout(15)
-if args.verbosity == 2:
-    logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
+if args.verbosity == 1:
+    logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s',
                         level=logging.INFO, datefmt='%Y/%m/%d %H:%M')
-elif args.verbosity == 1:
-    logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
+elif args.verbosity == 2:
+    logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s',
+                        level=logging.DEBUG, datefmt='%Y/%m/%d %H:%M')
+elif args.verbosity == 3:
+    logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s',
                         level=logging.ERROR, datefmt='%Y/%m/%d %H:%M')
+
 
 def main():
     """Main function to download music from WREK."""
-
-    # Wait for change day for them to update their data base.
-    #
-    # TODO: What is the purpose of this func?
-    # TODO: does this make sense? If we are offsetting the days (like waiting
-    # for two days to download) we are covered against this problem.
-    # TODO: maybe this could be called in between each downloads in case they
-    # take a long time.
-    auxf.wait_for_change_day()
-
     # Initialize shows.
-    all_wrek_shows = initialize_shows()
+    all_wrek_shows = parse_wrek_website.initialize_shows()
+    all_wrek_shows_names = sorted(set([x.name for x in all_wrek_shows]))
+    logging.info('Initialized shows.')
+    logging.debug('All shows:\n%s',
+                  '\n'.join(all_wrek_shows_names))
 
     # Initialize whitelist.
-    whitelist = auxf.create_whitelist(WHITELIST)
+    whitelist = auxf.create_whitelist(WHITELIST_FILE)
+    logging.debug('Whitelist:\n%s', '\n'.join(sorted(whitelist)))
 
     # Remove non whitelisted programs
     whitelisted_wrek_shows = [x for x in all_wrek_shows if x.name in whitelist]
+    logging.info('Initialized whitelist:\n%s', (
+        '\n'.join(sorted(set([x.name for x in whitelisted_wrek_shows])))))
+
+    # Show new programs
+    set_of_new_programs = (
+        set(all_wrek_shows_names)
+        - set(auxf.shows_in_whitelist(WHITELIST_FILE)))
+    if set_of_new_programs:
+        logging.info('New shows not included in the whitelist:\n%s',
+                     '\n'.join(sorted(set_of_new_programs)))
+        # Here the default is to include the new program in a comment in the
+        # whitelist file and create a file warning for new programs.
+        if BATCH_MODE:
+            auxf.include_programs_in_whitelist(
+                WHITELIST_FILE,
+                sorted(set_of_new_programs))
+        else:
+            if input('Do you want to include the new programs in your '
+                     'whitelist file? [y/n]\n') == 'y':
+                auxf.include_programs_in_whitelist(
+                    WHITELIST_FILE,
+                    sorted(set_of_new_programs))
 
     for show in whitelisted_wrek_shows:
         show.download(
-            DEST_DIR,
-            temporary_directory=TMP_DIR,
+            temporary_directory=TEMPORARY_FOLDER,
             download_old_archive=True)
+        logging.debug('Downloaded all files for show %s',
+                      str(show))
+
 
 if __name__ == '__main__':
-    w = auxf.create_whitelist(WHITELIST)
-    z = parse_wrek_website()
-    y = initialize_shows()
-    p = y[0]
-    het = [x for x in y if 'theory' in x.name][0]
-    atm = [x for x in y if 'atmosph' in x.name][0]
-    # het.download('/tmp', download_old_archive=True)
+    update_m3u_files.update_m3u_files()
     main()
