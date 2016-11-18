@@ -1,0 +1,5 @@
+language: python
+python:
+    - "3.4"
+before_install:
+    - pip3 install urllib3
