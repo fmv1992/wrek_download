@@ -59,6 +59,10 @@ parser.add_argument('--batch',
                     action="store_true",
                     required=False,
                     default=False)
+
+# TODO: add an argument for putting new programs to download on whitelist or
+# just put them on #program_name
+
 args = parser.parse_args()
 
 # Path specifications
