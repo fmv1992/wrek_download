@@ -84,6 +84,9 @@ The program then downloads the files from the archive formated with YYYYMMDD fol
     #psych_out
 
 ## TODO
+
+- *Update this readme/documentation*
+
 - improve verbosity functionality
 - rely on pathlib only instead of a mix of pathlib and strings
 	- on hold since pathlib may be removed from stdlib
