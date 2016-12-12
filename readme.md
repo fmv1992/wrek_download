@@ -7,28 +7,32 @@ Music you don't hear on the radio.
 [![Build Status](https://travis-ci.org/fmv1992/wrek_download.svg?branch=develop)](https://travis-ci.org/fmv1992/wrek_download)
 
 ## Usage
-    cd wrek_download/
-    python3 wrek_download/main.py --help
-    usage: main.py [-h] [--verbose] [--verbosity VERBOSITY]
-                [--archivefolder ARCHIVEFOLDER]
-                [--temporaryfolder TEMPORARYFOLDER] --outputfolder OUTPUTFOLDER
-                --whitelist WHITELIST [--batch]
-    optional arguments:
-    -h, --help              show this help message and exit
-    --verbose               Puts the program in verbose mode.
-    --verbosity VERBOSITY
-                            Sets the verbosity of the program. Use 1 for info, 2
-                            for debugging and 3 for errors.
-    --archivefolder ARCHIVEFOLDER
-                            Archive folder where the m3u files are.
-    --temporaryfolder TEMPORARYFOLDER
-                            Temporary folder for ongoing downloads.
-    --outputfolder OUTPUTFOLDER
-                            Output folder to put downloaded files when finished.
-    --whitelist WHITELIST
-                            Selected programs to be downloaded.
-    --batch                 If present skip any prompt and follow some
-                            default/sane option.
+    ### Full working example
+        cd wrek_download/
+    
+    ### All arguments
+        cd wrek_download/
+        python3 wrek_download/main.py --help
+        usage: main.py [-h] [--verbose] [--verbosity VERBOSITY]
+                    [--archivefolder ARCHIVEFOLDER]
+                    [--temporaryfolder TEMPORARYFOLDER] --outputfolder OUTPUTFOLDER
+                    --whitelist WHITELIST [--batch]
+        optional arguments:
+        -h, --help              show this help message and exit
+        --verbose               Puts the program in verbose mode.
+        --verbosity VERBOSITY
+                                Sets the verbosity of the program. Use 1 for info, 2
+                                for debugging and 3 for errors.
+        --archivefolder ARCHIVEFOLDER
+                                Archive folder where the m3u files are.
+        --temporaryfolder TEMPORARYFOLDER
+                                Temporary folder for ongoing downloads.
+        --outputfolder OUTPUTFOLDER
+                                Output folder to put downloaded files when finished.
+        --whitelist WHITELIST
+                                Selected programs to be downloaded.
+        --batch                 If present skip any prompt and follow some
+                                default/sane option.
 
 The program then downloads the files from the archive formated with YYYYMMDD followed by the program number of the day NN followed by the name of the program and lastly the block of the program (files have 30 minutes). So for example you will get: `20160506_08_stonehenge_02.mp3` for the Stonehenge program aired on May 06, 2016 (this file is the third block of the program as the numbering starts with '00').
 ## Example of whitelist file:
@@ -98,4 +102,5 @@ The program then downloads the files from the archive formated with YYYYMMDD fol
     #psych_out
 
 ## TODO
-- (empty)
+- Start with a decent archive folder.
+- Uniformize descriptive strings in python3 main.py --help.
