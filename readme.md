@@ -3,6 +3,9 @@ Downloads the archive from http://www.wrek.org/ in mp3.
 
 Music you don't hear on the radio.
 
+## Travis CI status
+[![Build Status](https://travis-ci.org/fmv1992/wrek_download.svg?branch=develop)](https://travis-ci.org/fmv1992/wrek_download)
+
 ## Usage
     cd wrek_download/
     
