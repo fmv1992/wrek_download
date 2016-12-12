@@ -91,19 +91,22 @@ URL_M3U = 'http://www.wrek.org/playlist.php/main/128kbs/current/'
 
 # Logging level and format definitions.
 socket.setdefaulttimeout(15)
-if args.verbosity == 1:
-    LOGGING_LEVEL = logging.INFO
-elif args.verbosity == 2:
-    LOGGING_LEVEL = logging.DEBUG
-elif args.verbosity == 3:
-    LOGGING_LEVEL = logging.ERROR
-MESSAGE_FORMAT = '{levelname: <6}: {asctime}: {message}'
-DATE_FORMAT = '%Y/%m/%d %H:%M'
-logging.basicConfig(
-    format=MESSAGE_FORMAT,
-    level=LOGGING_LEVEL,
-    datefmt=DATE_FORMAT,
-    style='{')
+if not args.verbose:  # If verbose is false do not log anything.
+    logging.disable(logging.CRITICAL)
+else:
+    if args.verbosity == 1:
+        LOGGING_LEVEL = logging.INFO
+    elif args.verbosity == 2:
+        LOGGING_LEVEL = logging.DEBUG
+    elif args.verbosity == 3:
+        LOGGING_LEVEL = logging.ERROR
+    MESSAGE_FORMAT = '{levelname: <6}: {asctime}: {message}'
+    DATE_FORMAT = '%Y/%m/%d %H:%M'
+    logging.basicConfig(
+        format=MESSAGE_FORMAT,
+        level=LOGGING_LEVEL,
+        datefmt=DATE_FORMAT,
+        style='{')
 
 def main():
     """Main function to download music from WREK."""
