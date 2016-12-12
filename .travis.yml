@@ -1,7 +1,5 @@
 language: python
 python:
     - "3.4"
-install:
-    "pip3 install urllib3"
 script:
     "python3 -m unittest tests/wrek_tests.py"

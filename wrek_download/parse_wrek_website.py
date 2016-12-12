@@ -24,7 +24,6 @@ References:
 
 """
 
-import httplib2
 import urllib.request
 import os
 import re
@@ -264,8 +263,8 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
         x = re.sub('_$', '', x)
         return x
     TMPDIR = '/tmp'
-    h = httplib2.Http(os.path.join(TMPDIR, '.wrek_cache'))
-    _, content = h.request(url)
+    h = urllib.request.urlopen(url)
+    content = h.read()
     weekdays = re.findall(
         'schedule-day' + '.*?' + 'grid_3',
         content.decode())

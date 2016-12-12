@@ -11,13 +11,12 @@ It moves the old, deprecated m3u files to archive_deprecated_folder.
 # pylama:ignore=W0611,W0511
 # TODO: put logging where needed
 # TODO: Notificate user that a new show is available
-import httplib2
 import os
 import re
 import shutil
 import logging
 import main
-import ssl
+import urllib.request
 
 
 def update_m3u_files():
@@ -34,26 +33,10 @@ def update_m3u_files():
 
     """
     # Setting up HTTP object, WREK website as text and local m3u files.
-    try:
-        h = httplib2.Http(os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'))
-        logging.debug('Contacting WREK website at %s',
-                      main.URL_WREK)
-        response, content = h.request(main.URL_WREK)
-        del response
-    except ssl.SSLError as sslerror:
-        if main.BATCH_MODE:
-            raise sslerror
-        else:
-            if input('SSL CERTIFICATE ERROR: '
-                     'Do you want to continue? [y/n]\n') == 'y':
-                del h
-                h = httplib2.Http(
-                    os.path.join(main.TEMPORARY_FOLDER, '.wrek_cache'),
-                    disable_ssl_certificate_validation=True)
-                response, content = h.request(main.URL_WREK)
-                del response
-            else:
-                raise sslerror
+    logging.debug('Contacting WREK website at %s', main.URL_WREK)
+    h = urllib.request.urlopen(main.URL_WREK)
+    response, content = (h.status, h.read())
+    del response
     text = content.decode()
     local_m3u_file_names = [
         f for f in os.listdir(main.ARCHIVE_FOLDER) if
@@ -67,7 +50,8 @@ def update_m3u_files():
     # Get remote m3u files content.
     remote_m3u_content = dict()
     for m3u in remote_m3u_file_names:
-        remote_m3u_content[m3u] = h.request(main.URL_M3U + m3u)[1].decode()
+        h = urllib.request.urlopen(main.URL_M3U + m3u)
+        remote_m3u_content[m3u] = h.read().decode()
     # logging.debug('Got all remote m3u file contents.')
     # Put old suffix in every mp3 file as all the programs supposes that
     # they come with this prefix
