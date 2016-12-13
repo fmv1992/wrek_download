@@ -43,7 +43,7 @@ WEEKDAYS = ['monday',  # This is day zero
             'sunday']
 
 
-class WREK_Show(object):
+class WREKShow(object):
 
     u"""WREK radio show object.
 
@@ -293,7 +293,7 @@ def initialize_shows():
         (no arguments)
 
     Returns:
-        list: A list full list of WREK_Show objects.
+        list: A list full list of WREKShow objects.
 
     """
     all_shows = []
@@ -303,7 +303,7 @@ def initialize_shows():
         for index_program, program in enumerate(
                 parsed_shows_data['names'][index_day]):
             all_shows.append(
-                WREK_Show(
+                WREKShow(
                     program,
                     weekday,
                     parsed_shows_data['begin_times'][index_day][index_program],
