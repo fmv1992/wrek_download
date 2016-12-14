@@ -123,7 +123,7 @@ def main():
 
     # Remove non whitelisted programs
     whitelisted_wrek_shows = [x for x in all_wrek_shows if x.name in whitelist]
-    logging.info('Initialized whitelist:\n%s', (
+    logging.debug('Initialized whitelist:\n%s', (
         '\n'.join(sorted(set([x.name for x in whitelisted_wrek_shows])))))
 
     # Show new programs
