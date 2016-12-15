@@ -7,10 +7,14 @@ Music you don't hear on the radio.
 [![Build Status](https://travis-ci.org/fmv1992/wrek_download.svg?branch=develop)](https://travis-ci.org/fmv1992/wrek_download)
 
 ## Usage
-    ### Full working example
+### Minimal working example
+
         cd wrek_download/
+        python3 wrek_download/main.py --outputfolder ~/music \
+                                      --whitelist wrek_whitelist_example.txt
     
-    ### All arguments
+### All arguments
+
         cd wrek_download/
         python3 wrek_download/main.py --help
         usage: main.py [-h] [--verbose] [--verbosity VERBOSITY]
