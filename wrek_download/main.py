@@ -22,12 +22,21 @@ import logging
 import argparse
 import aux_functions as auxf
 import parse_wrek_website
+from datetime import datetime as dt
 import update_m3u_files
 
 ROOT_FOLDER = os.path.dirname(
     os.path.dirname(
         os.path.abspath(__file__)))
 
+# TODO: already declared somewhere, jsut to cover a hole.
+WEEKDAYS = ['monday',  # This is day zero
+            'tuesday',
+            'wednesday',
+            'thursday',
+            'friday',
+            'saturday',
+            'sunday']
 # Parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--verbose',
@@ -123,6 +132,11 @@ def main():
 
     # Remove non whitelisted programs
     whitelisted_wrek_shows = [x for x in all_wrek_shows if x.name in whitelist]
+    # Sort days to start with oldest day so the program that is most near to
+    # deletion is downloaded first.
+    whitelisted_wrek_shows = sorted(
+        whitelisted_wrek_shows,
+        key=lambda x: (WEEKDAYS.index(x.weekday) - dt.now().weekday() -1)%7)
     logging.debug('Initialized whitelist:\n%s', (
         '\n'.join(sorted(set([x.name for x in whitelisted_wrek_shows])))))
 
@@ -146,12 +160,13 @@ def main():
                     WHITELIST_FILE,
                     sorted(set_of_new_programs))
 
-    for show in whitelisted_wrek_shows:
-        show.download(
-            temporary_directory=TEMPORARY_FOLDER,
-            download_old_archive=True)
-        logging.debug('Downloaded all files for show %s',
-                      str(show))
+    for download_old in (True, False):
+        for show in whitelisted_wrek_shows:
+            show.download(
+                temporary_directory=TEMPORARY_FOLDER,
+                download_old_archive=download_old)
+            logging.debug('Downloaded all files for show %s',
+                        str(show))
 
 
 if __name__ == '__main__':

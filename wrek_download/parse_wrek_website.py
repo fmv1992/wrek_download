@@ -194,16 +194,15 @@ class WREKShow(object):
                 'rt') as m3ufile:  # noqa
             m3u_file_content = m3ufile.readlines()
 
-        if download_old_archive:
-            iterate_over_new_and_old = (True, False)
-        else:
-            iterate_over_new_and_old = (False, )
+        # if download_old_archive:
+            # iterate_over_new_and_old = (True, False)
+        # else:
+            # iterate_over_new_and_old = (False, )
 
-        # Start downloading old then proceed to new files.
-        for is_archive_file in iterate_over_new_and_old:
+        # for is_archive_file in iterate_over_new_and_old:
             for line_number, m3uline in enumerate(m3u_file_content):
                 filename = self._create_filename(line_number,
-                                                    is_archive_file)
+                                                 download_old_archive)
                 # Filename will return '' for days within threshold to avoid
                 # file management problems (we are playing on the safe side
                 # here giving WREK staff a couple of days to update their
@@ -221,7 +220,7 @@ class WREKShow(object):
                             main.TEMPORARY_FOLDER,
                             m3uline,
                             line_number,
-                            is_archive_file):
+                            download_old_archive):
                         auxf.move_downloaded_file(
                             os.path.join(main.TEMPORARY_FOLDER, filename),
                             os.path.join(main.OUTPUT_FOLDER, filename))
