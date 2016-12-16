@@ -29,8 +29,6 @@ import os
 import re
 import string
 import datetime
-# import logging
-import main
 import aux_functions as auxf
 import logging
 
@@ -67,7 +65,8 @@ class WREKShow(object):
                  begin_time,
                  end_time,
                  m3u_filename,
-                 show_number_in_day):
+                 show_number_in_day,
+                 constants):
         u"""The init function for this class."""
         self.begin_time = begin_time
         self.end_time = end_time
@@ -75,6 +74,7 @@ class WREKShow(object):
         self.name = name
         self.show_number_in_day = show_number_in_day
         self.weekday = weekday
+        self.constants = constants
 
     def _download_one_file_from_m3u_file(
             self,
@@ -102,7 +102,7 @@ class WREKShow(object):
             urllib.request.urlretrieve(
                 download_url,
                 filename=os.path.join(
-                    main.TEMPORARY_FOLDER,
+                    self.constants['TEMPORARY_FOLDER'],
                     filename)
             )
         except urllib.error.HTTPError as error01:
@@ -152,7 +152,7 @@ class WREKShow(object):
         # website so often.
         threshold_to_skip_download = datetime.timedelta(2)  # In days.
 
-        while aired_day.weekday() != WEEKDAYS.index(self.weekday):
+        while aired_day.weekday() != self.constants['WEEKDAYS'].index(self.weekday):
             aired_day -= datetime.timedelta(days=1)
         if is_archive_file:
             aired_day -= 7 * datetime.timedelta(days=1)
@@ -189,7 +189,7 @@ class WREKShow(object):
         """
         with open(
                 os.path.join(  # noqa
-                    main.ARCHIVE_FOLDER,
+                    self.constants['ARCHIVE_FOLDER'],
                     self.m3u_filename),
                 'rt') as m3ufile:  # noqa
             m3u_file_content = m3ufile.readlines()
@@ -210,20 +210,20 @@ class WREKShow(object):
                 if not filename:
                     continue
                 if auxf.check_output_file_exists(
-                        main.OUTPUT_FOLDER, filename):
+                        self.constants['OUTPUT_FOLDER'], filename):
                     logging.debug('File %s exists.',
                                     filename)
                 else:
                     logging.debug('File %s does not exist.',
                                     filename)
                     if self._download_one_file_from_m3u_file(
-                            main.TEMPORARY_FOLDER,
+                            self.constants['TEMPORARY_FOLDER'],
                             m3uline,
                             line_number,
                             download_old_archive):
                         auxf.move_downloaded_file(
-                            os.path.join(main.TEMPORARY_FOLDER, filename),
-                            os.path.join(main.OUTPUT_FOLDER, filename))
+                            os.path.join(self.constants['TEMPORARY_FOLDER'], filename),
+                            os.path.join(self.constants['OUTPUT_FOLDER'], filename))
                         logging.info('Downloaded show %s.',
                                     filename)
                     else:
@@ -285,7 +285,7 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
     return attributes_to_show_object
 
 
-def initialize_shows():
+def initialize_shows(constants):
     u"""Initialize all the shows objects.
 
     Arguments:
@@ -303,10 +303,15 @@ def initialize_shows():
                 parsed_shows_data['names'][index_day]):
             all_shows.append(
                 WREKShow(
-                    program,
-                    weekday,
+                    program,    # name
+                    weekday,    # weekday
+                    # begin time
                     parsed_shows_data['begin_times'][index_day][index_program],
+                    # end time
                     parsed_shows_data['end_times'][index_day][index_program],
+                    # m3u_filename
                     parsed_shows_data['m3u_urls'][index_day][index_program],
-                    index_program))
+                    index_program,  # show number in day
+                    constants,  # constants
+                ))
     return all_shows

@@ -15,11 +15,10 @@ import os
 import re
 import shutil
 import logging
-import main
 import urllib.request
 
 
-def update_m3u_files():
+def update_m3u_files(constants):
     u"""Update the archive folder with the newest m3u files.
 
     Downloads WREK website and parses it using regular expressions.
@@ -33,14 +32,14 @@ def update_m3u_files():
 
     """
     # Setting up HTTP object, WREK website as text and local m3u files.
-    logging.debug('Contacting WREK website at %s', main.URL_WREK)
-    h = urllib.request.urlopen(main.URL_WREK)
+    logging.debug('Contacting WREK website at %s', constants['URL_WREK'])
+    h = urllib.request.urlopen(constants['URL_WREK'])
     response, content = (h.status, h.read())
     del response
     text = content.decode()
     local_m3u_file_names = [
-        f for f in os.listdir(main.ARCHIVE_FOLDER) if
-        (os.path.isfile(os.path.join(main.ARCHIVE_FOLDER, f)) and
+        f for f in os.listdir(constants['ARCHIVE_FOLDER']) if
+        (os.path.isfile(os.path.join(constants['ARCHIVE_FOLDER'], f)) and
          (f.endswith('m3u')))]
 
     # Find the name of all m3u files that are 128kbps.
@@ -50,7 +49,7 @@ def update_m3u_files():
     # Get remote m3u files content.
     remote_m3u_content = dict()
     for m3u in remote_m3u_file_names:
-        h = urllib.request.urlopen(main.URL_M3U + m3u)
+        h = urllib.request.urlopen(constants['URL_M3U'] + m3u)
         remote_m3u_content[m3u] = h.read().decode()
     # logging.debug('Got all remote m3u file contents.')
     # Put old suffix in every mp3 file as all the programs supposes that
@@ -64,7 +63,7 @@ def update_m3u_files():
     # Get local m3u files content.
     local_m3u_content = dict()
     for m3u in local_m3u_file_names:
-        with open(os.path.join(main.ARCHIVE_FOLDER, m3u)) as f:
+        with open(os.path.join(constants['ARCHIVE_FOLDER'], m3u)) as f:
             local_m3u_content[m3u] = f.read()
 
     # Checks wheter local and remote files are the same. Moves local files that
@@ -81,9 +80,11 @@ def update_m3u_files():
                           remote_m3u_content[m3u])
             # Move local file to deprecated folder.
             # TODO: check if this part of the code is working correctly.
-            src = os.path.abspath(os.path.join(main.ARCHIVE_FOLDER, m3u))
+            src = os.path.abspath(os.path.join(
+                constants['ARCHIVE_FOLDER'],
+                m3u))
             dst = os.path.abspath(
-                os.path.join(main.DEPRECATED_ARCHIVE_FOLDER, m3u))
+                os.path.join(constants['DEPRECATED_ARCHIVE_FOLDER'], m3u))
             shutil.move(
                 src,
                 dst)
@@ -105,9 +106,10 @@ def update_m3u_files():
 
     # Default behavior is to add extra programs and disregard spurious ones.
     for m3u in extra_programs:
-        with open(os.path.join(main.ARCHIVE_FOLDER, m3u), 'wt') as f:
+        with open(os.path.join(constants['ARCHIVE_FOLDER'], m3u), 'wt') as f:
             f.write(remote_m3u_content[m3u])
     return True
+
 
 if __name__ == '__main__':
     update_m3u_files()
