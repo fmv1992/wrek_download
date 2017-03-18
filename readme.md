@@ -37,6 +37,8 @@ This program downloads the files from the archive formated with YYYYMMDD followe
 
 ## Example of whitelist file:
 
+Lines starting with a `#` are ignored/comments. This only the first block of shows will be downloaded (from 'Inside the Black Box' to 'Friday Night Fish Fry').
+
     inside_the_black_box
     sunday_special
     stonehenge
