@@ -33,14 +33,10 @@ def update_m3u_files(constants):
     """
     # Setting up HTTP object, WREK website as text and local m3u files.
     logging.debug('Contacting WREK website at %s', constants['URL_WREK'])
-    h = urllib.request.urlopen(constants['URL_WREK'])
+    h = urllib.request.urlopen(constants['URL_WREK'], cafile=None, capath=None)
     response, content = (h.status, h.read())
     del response
     text = content.decode()
-    local_m3u_file_names = [
-        f for f in os.listdir(constants['ARCHIVE_FOLDER']) if
-        (os.path.isfile(os.path.join(constants['ARCHIVE_FOLDER'], f)) and
-         (f.endswith('m3u')))]
 
     # Find the name of all m3u files that are 128kbps.
     remote_m3u_file_names = re.findall('(?<=current\/)[^>]*?\.m3u(?=\">128k<)',
@@ -51,6 +47,7 @@ def update_m3u_files(constants):
     for m3u in remote_m3u_file_names:
         h = urllib.request.urlopen(constants['URL_M3U'] + m3u)
         remote_m3u_content[m3u] = h.read().decode()
+        logging.debug('Added %s to m3u list.', m3u)
     # logging.debug('Got all remote m3u file contents.')
     # Put old suffix in every mp3 file as all the programs supposes that
     # they come with this prefix
@@ -60,53 +57,12 @@ def update_m3u_files(constants):
     remote_m3u_content = {k: re.sub('(?<!_old)\.mp3', '_old.mp3', v) for k, v
                           in remote_m3u_content.items()}
 
-    # Get local m3u files content.
-    local_m3u_content = dict()
-    for m3u in local_m3u_file_names:
-        with open(os.path.join(constants['ARCHIVE_FOLDER'], m3u)) as f:
-            local_m3u_content[m3u] = f.read()
-
-    # Checks wheter local and remote files are the same. Moves local files that
-    # are different to the deprecated folder.
-    for m3u in set(local_m3u_content.keys()) & set(remote_m3u_content.keys()):
-        # Reduce comparison to not include '_old' to be sure that we are as
-        # general as possible.
-        if (local_m3u_content[m3u].replace('_old', '') !=
-                remote_m3u_content[m3u].replace('_old', '')):
-            logging.info('Local m3u file: %s is different from remote.',
-                         (m3u))
-            logging.debug('\nLocal file:\n%sRemote file:\n%s',
-                          local_m3u_content[m3u],
-                          remote_m3u_content[m3u])
-            # Move local file to deprecated folder.
-            # TODO: check if this part of the code is working correctly.
-            src = os.path.abspath(os.path.join(
-                constants['ARCHIVE_FOLDER'],
-                m3u))
-            dst = os.path.abspath(
-                os.path.join(constants['DEPRECATED_ARCHIVE_FOLDER'], m3u))
-            shutil.move(
-                src,
-                dst)
-            logging.info('Moved: %s -> %s', src, dst)
-            # Save remote file.
-            with open(src, 'wt') as f:
-                logging.debug('Wrote remote %s with content:\n%s at %s.',
-                              m3u,
-                              remote_m3u_content[m3u],
-                              src)
-                f.write(remote_m3u_content[m3u])
-
-    # Compares remote and local m3u files.
-    extra_programs = (set(remote_m3u_content.keys())
-                      - set(local_m3u_content.keys()))
-    if extra_programs:
-        logging.debug('Got some extra programs: \n\t%s',
-                      '\n\t'.join(sorted(extra_programs)))
-
     # Default behavior is to add extra programs and disregard spurious ones.
-    for m3u in extra_programs:
-        with open(os.path.join(constants['ARCHIVE_FOLDER'], m3u), 'wt') as f:
+    for m3u in remote_m3u_content:
+        with open(
+                os.path.join(constants['ARCHIVE_FOLDER'],
+                             m3u),
+                'wt') as f:
             f.write(remote_m3u_content[m3u])
     return True
 

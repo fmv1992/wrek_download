@@ -16,6 +16,7 @@ The range of downloading days should be 12 october untill 22 october
 # not wrong)
 # TODO: download an entire week of WREK and check if there are 48 files.
 # TODO: create a notify flag to permanently notify the user of a new program.
+import tempfile
 import os
 import socket
 import logging
@@ -28,45 +29,38 @@ import update_m3u_files
 
 def parse_cli_arguments():
     u"""Parse command line arguments for the main program."""
-
-    ROOT_FOLDER = os.path.dirname(
-            os.path.dirname(
-                        os.path.abspath(__file__)))
-
     # Parsing
     parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose',
-                        help='Puts the program in verbose mode.',
-                        action="store_true",
-                        default=False)
-    parser.add_argument('--verbosity',
-                        help='Sets the verbosity of the program. '
-                            'Use 1 for info, 2 for debugging and 3 for errors.',
-                        type=int, default=1)
-    parser.add_argument('--archivefolder',
-                        help='Archive folder where the m3u files are.',
-                        required=False,
-                        default=os.path.join(ROOT_FOLDER, 'archive'))
-    parser.add_argument('--temporaryfolder',
-                        help='Temporary folder for ongoing downloads.',
-                        required=False,
-                        default='/tmp')
-    parser.add_argument('--outputfolder',
-                        help='Output folder to put downloaded files when '
-                            'finished.',
-                        required=True)
-    parser.add_argument('--whitelist',
-                        help='Selected programs to be downloaded.',
-                        required=True,)
-    parser.add_argument('--batch',
-                        help='If present skip any prompt and follow some '
-                        'default/sane option.',
-                        action="store_true",
-                        required=False,
-                        default=False)
+    parser.add_argument(
+        '--verbose',
+        help='puts the program in verbose mode.',
+        action="store_true",
+        default=False)
+    parser.add_argument(
+        '--verbosity',
+        help='sets the verbosity of the program. Use 1 for info, 2 for '
+             'debugging and 3 for errors.',
+        type=int,
+        default=1)
+    parser.add_argument(
+        '--outputfolder',
+        help='output folder to put downloaded files when '
+        'finished.',
+        required=True)
+    parser.add_argument(
+        '--whitelist',
+        help='text file with the program names to be downloaded.',
+        required=True,)
+    parser.add_argument(
+        '--batch',
+        help='if present skip any prompt and follow some '
+        'default/sane option.',
+        action="store_true",
+        required=False,
+        default=False)
 
-    # TODO: add an argument for putting new programs to download on whitelist or
-    # just put them on #program_name
+    # TODO: add an argument for putting new programs to download on whitelist
+    # or just put them on #program_name
     args = parser.parse_args()
 
     return args
@@ -74,7 +68,6 @@ def parse_cli_arguments():
 
 def define_constants(arguments):
     u"""Define constants for this and other modules."""
-
     ROOT_FOLDER = os.path.dirname(
             os.path.dirname(
                         os.path.abspath(__file__)))
@@ -87,25 +80,35 @@ def define_constants(arguments):
                 'friday',
                 'saturday',
                 'sunday']
+
     # Path specifications
-    ARCHIVE_FOLDER = os.path.abspath(arguments.archivefolder)
-    DEPRECATED_ARCHIVE_FOLDER = os.path.abspath(
-        os.path.join(ARCHIVE_FOLDER, 'deprecated_m3u_files'))
-    TEMPORARY_FOLDER = os.path.abspath(arguments.temporaryfolder)
+    # ARCHIVE_FOLDER = os.path.abspath(arguments.archivefolder)
+    # DEPRECATED_ARCHIVE_FOLDER = os.path.abspath(
+    #     os.path.join(ARCHIVE_FOLDER, 'deprecated_m3u_files'))
+    # TEMPORARY_FOLDER = os.path.abspath(arguments.temporaryfolder)
+
+    TEMPORARY_FOLDER = tempfile.TemporaryDirectory(prefix='wrek_download_tmp')
+    logging.debug('Temporary folder is: %s.', TEMPORARY_FOLDER.name)
+    ARCHIVE_FOLDER = os.path.join(TEMPORARY_FOLDER.name, 'archive')
+    os.mkdir(ARCHIVE_FOLDER)
+    TEMP_DOWNLOAD_FOLDER = os.path.join(TEMPORARY_FOLDER.name, 'temp_download')
+    os.mkdir(TEMP_DOWNLOAD_FOLDER)
+    # print(tuple(os.walk(TEMPORARY_FOLDER.name)))
+
     OUTPUT_FOLDER = os.path.abspath(arguments.outputfolder)
     WHITELIST_FILE = os.path.abspath(arguments.whitelist)
     BATCH_MODE = arguments.batch
 
     # Test if target folders exist and whitelist file.
-    LIST_OF_ARGUMENTS_FOLDERS = [ARCHIVE_FOLDER, DEPRECATED_ARCHIVE_FOLDER,
-                            TEMPORARY_FOLDER, OUTPUT_FOLDER]
+    LIST_OF_ARGUMENTS_FOLDERS = [ARCHIVE_FOLDER, TEMP_DOWNLOAD_FOLDER,
+                                 OUTPUT_FOLDER]
     for one_folder in LIST_OF_ARGUMENTS_FOLDERS:
         if not os.path.isdir(one_folder):
             raise FileNotFoundError('One of the arguments: \'{0}\' does '
                                     'not exist.'.format(one_folder))
     if not os.path.isfile(WHITELIST_FILE):
-        raise FileNotFoundError('Whitelist file \'{0}\' does not exist.'.format(
-            WHITELIST_FILE))
+        raise FileNotFoundError('Whitelist file \'{0}\' does not'
+                                'exist.'.format(WHITELIST_FILE))
 
     # Constants
     URL_WREK = 'http://www.wrek.org/schedule/'
@@ -115,14 +118,14 @@ def define_constants(arguments):
         'ROOT_FOLDER': ROOT_FOLDER,
         'WEEKDAYS': WEEKDAYS,
         'ARCHIVE_FOLDER': ARCHIVE_FOLDER,
-        'DEPRECATED_ARCHIVE_FOLDER': DEPRECATED_ARCHIVE_FOLDER,
+        # Note that if TEMPORARY_FOLDER is not passed here it ceases to exist.
         'TEMPORARY_FOLDER': TEMPORARY_FOLDER,
+        'TEMP_DOWNLOAD_FOLDER': TEMP_DOWNLOAD_FOLDER,
         'OUTPUT_FOLDER': OUTPUT_FOLDER,
         'WHITELIST_FILE': WHITELIST_FILE,
         'BATCH_MODE': BATCH_MODE,
         'URL_WREK': URL_WREK,
-        'URL_M3U': URL_M3U
-    }
+        'URL_M3U': URL_M3U}
 
     return constants
 
@@ -168,7 +171,8 @@ def main(constants):
     # deletion is downloaded first.
     whitelisted_wrek_shows = sorted(
         whitelisted_wrek_shows,
-        key=lambda x: (constants['WEEKDAYS'].index(x.weekday) - dt.now().weekday() -1)%7)
+        key=lambda x: (constants['WEEKDAYS'].index(x.weekday) -
+                       dt.now().weekday() - 1) % 7)
     logging.debug('Initialized whitelist:\n%s', (
         '\n'.join(sorted(set([x.name for x in whitelisted_wrek_shows])))))
 
@@ -197,13 +201,12 @@ def main(constants):
             show.download(
                 temporary_directory=constants['TEMPORARY_FOLDER'],
                 download_old_archive=download_old)
-            logging.debug('Downloaded all files for show %s',
-                        str(show))
+            logging.debug('Downloaded all files for show %s', str(show))
 
 
 if __name__ == '__main__':
     args = parse_cli_arguments()
-    constants = define_constants(args)
     setup_logging()
+    constants = define_constants(args)
     update_m3u_files.update_m3u_files(constants)
     main(constants)
