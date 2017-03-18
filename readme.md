@@ -108,3 +108,4 @@ The program then downloads the files from the archive formated with YYYYMMDD fol
 ## TODO
 - Start with a decent archive folder.
 - Uniformize descriptive strings in python3 main.py --help.
+- Use tempfile as temporary folder

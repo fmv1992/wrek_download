@@ -13,7 +13,6 @@ from wrek_download.parse_wrek_website import initialize_shows
 # Ignore setting attribute outside init.
 # pylama: ignore:W0201
 
-
 class AuxiliarFunctionsTestCase(unittest.TestCase):
 
     u"""Test the aux_functions.py file."""
@@ -40,9 +39,11 @@ class WREKShowTestCase(unittest.TestCase):
     def setUp(self):
         u"""Set up test framework."""
         self.wrek_programs = initialize_shows()
-        self.archive_folder = tempfile.TemporaryDirectory()
-        self.temporary_folder = tempfile.TemporaryDirectory()
-        self.output_folder = tempfile.TemporaryDirectory()
+        # Paths
+        self.archive_path = tempfile.TemporaryDirectory()
+        self.temporary_path = tempfile.TemporaryDirectory()
+        self.output_path = tempfile.TemporaryDirectory()
+        self.whitelist_path = tempfile.TemporaryFile()
         self.program = None
 
 
@@ -52,7 +53,14 @@ class AtmosphericsTestCase(WREKShowTestCase):
 
     def setUp(self):
         u"""Set up test framework."""
+        super(AtmosphericsTestCase, self,).setUp()
         self.program = [x for x in self.wrek_programs if 'atmospherics' in x][0]
+        print(self.program)
+
+    def test_print_attr(self):
+        for attr in dir(self):
+            print(attr, getattr(self, attr))
+
 
 
 if __name__ == '__main__':
