@@ -106,11 +106,12 @@ Lines starting with a `#` are ignored/comments. Thus only the first block of sho
 
 ## TODO
 
+- Improve meaningfulness of the test.
+- Download only files present in the whitelist file (thus making the downloading phase faster).
 - ~~Start with a decent archive folder.~~
 - ~~Uniformize descriptive strings in python3 main.py --help.~~
 - ~~Use tempfile as temporary folder.~~
 - ~~Move archive folder and temporary folder inside tempfile folder making both disposable.~~
-- Improve meaningfulness of the test.
 
 ## Changelog
 
