@@ -53,8 +53,8 @@ class WREKShow(object):
         end_time (str): end time in format 00:00 AM.
         m3u_filename (str): the filename for the m3u file.
         name (str): show name.
-        show_number_in_day (int): the numbering of the show in the day (starting
-        from zero).
+        show_number_in_day (int): the numbering of the show in the day
+        (starting from zero).
         weekday (str): weekday in which the show is aired.
 
     """
@@ -102,13 +102,13 @@ class WREKShow(object):
             urllib.request.urlretrieve(
                 download_url,
                 filename=os.path.join(
-                    self.constants['TEMPORARY_FOLDER'],
+                    self.constants['TEMP_DOWNLOAD_FOLDER'],
                     filename)
             )
         except urllib.error.HTTPError as error01:
             # TODO: info is not the best choice here
-            # TODO: logging is not correct and error's cause is not investigated
-            # yet
+            # TODO: logging is not correct and error's cause is not
+            # investigated yet
             logging.info(
                 'Could not download {0} due to {1}'.format(
                     self.__repr__(),
@@ -152,7 +152,8 @@ class WREKShow(object):
         # website so often.
         threshold_to_skip_download = datetime.timedelta(2)  # In days.
 
-        while aired_day.weekday() != self.constants['WEEKDAYS'].index(self.weekday):
+        while (aired_day.weekday()
+               != self.constants['WEEKDAYS'].index(self.weekday)):
             aired_day -= datetime.timedelta(days=1)
         if is_archive_file:
             aired_day -= 7 * datetime.timedelta(days=1)
@@ -211,25 +212,26 @@ class WREKShow(object):
                     continue
                 if auxf.check_output_file_exists(
                         self.constants['OUTPUT_FOLDER'], filename):
-                    logging.debug('File %s exists.',
-                                    filename)
+                    logging.debug('File %s exists.', filename)
                 else:
-                    logging.debug('File %s does not exist.',
-                                    filename)
+                    logging.debug('File %s does not exist.', filename)
                     if self._download_one_file_from_m3u_file(
-                            self.constants['TEMPORARY_FOLDER'],
+                            self.constants['TEMP_DOWNLOAD_FOLDER'],
                             m3uline,
                             line_number,
                             download_old_archive):
                         auxf.move_downloaded_file(
-                            os.path.join(self.constants['TEMPORARY_FOLDER'], filename),
-                            os.path.join(self.constants['OUTPUT_FOLDER'], filename))
+                            os.path.join(
+                                self.constants['TEMP_DOWNLOAD_FOLDER'],
+                                filename),
+                            os.path.join(
+                                self.constants['OUTPUT_FOLDER'],
+                                filename))
                         logging.info('Downloaded show %s.',
-                                    filename)
+                                     filename)
                     else:
                         return False
         return True
-
 
     def __repr__(self):
         u"""Representation for this object."""
@@ -261,7 +263,6 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
         x = re.sub('[^{0}]+'.format(allowed), '_', x.lower())
         x = re.sub('_$', '', x)
         return x
-    TMPDIR = '/tmp'
     h = urllib.request.urlopen(url)
     content = h.read()
     weekdays = re.findall(
