@@ -71,11 +71,15 @@ def parse_cli_arguments():
         action="store_true",
         required=False,
         default=False)
+    parser.add_argument(
+        '--n_threads',
+        help='number of threads to use for downloading.',
+        action="store",
+        type=int,
+        required=False,
+        default=3)
 
     args = parser.parse_args()
-
-    # TODO: add argument to define number of download threads.
-    args.n_threads = 5
 
     return args
 

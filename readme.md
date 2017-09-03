@@ -112,9 +112,6 @@ Fry').
 
 ## TODO
 
-- Parallelize downloads.
-    - Added optional argument n_threads to CLI.
-    - Added threading to `WREKShow.download`.
 - Improve meaningfulness of the tests.
 - ~~Download only m3u files present in the whitelist file (thus making the
   downloading phase faster).~~ (v1.1.3)
@@ -128,10 +125,13 @@ Fry').
 
 ### Version 1.1.4
 
-- Added threading to `update_m3u_files`.
+- Parallelize downloads.
+    - Added optional argument n_threads to CLI.
+    - Added threading to `WREKShow.download`.
 
 ### Version 1.1.3
 
+- Added threading to `update_m3u_files`.
 - Filtered whitelisted WREK shows prior to calling `update_m3u_files` (thus
   saving time).
 - Added several `TODO` tags to existing code.
