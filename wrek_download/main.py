@@ -1,5 +1,4 @@
-"""
-Download archives from WREK Atlanta student radio.
+"""Download archives from WREK Atlanta student radio.
 
 The idea is to create a timeline from the days prior to today (so today and
 the two previous days are excluded as a safeguard measure for the WREK to
@@ -67,7 +66,7 @@ def parse_cli_arguments():
 
 
 def define_constants(arguments):
-    u"""Define constants for this and other modules."""
+    u"""Define constants for this program."""
     ROOT_FOLDER = os.path.dirname(
             os.path.dirname(
                         os.path.abspath(__file__)))
@@ -131,7 +130,7 @@ def define_constants(arguments):
 
 
 def setup_logging():
-    u"""Setup logging options."""
+    """Set up logging options."""
     # Logging level and format definitions.
     socket.setdefaulttimeout(15)
     if not args.verbose:  # If verbose is false do not log anything.
@@ -152,15 +151,19 @@ def setup_logging():
             style='{')
 
 
-def main(constants):
-    """Main function to download music from constants['WREK']."""
+def initialize_all_wrek_shows(constants):
+    """Initilialize all wrek shows."""
     # Initialize shows.
     all_wrek_shows = parse_wrek_website.initialize_shows(constants)
     all_wrek_shows_names = sorted(set([x.name for x in all_wrek_shows]))
     logging.info('Initialized shows.')
     logging.debug('All shows:\n%s',
                   '\n'.join(all_wrek_shows_names))
+    return all_wrek_shows
 
+
+def filter_whitelisted_shows(constants, all_wrek_shows):
+    """Filter wrek shows according to a whitelist file."""
     # Initialize whitelist.
     whitelist = auxf.create_whitelist(constants['WHITELIST_FILE'])
     logging.debug('Whitelist:\n%s', '\n'.join(sorted(whitelist)))
@@ -176,6 +179,12 @@ def main(constants):
     logging.debug('Initialized whitelist:\n%s', (
         '\n'.join(sorted(set([x.name for x in whitelisted_wrek_shows])))))
 
+    return whitelisted_wrek_shows
+
+
+def main(constants, all_wrek_shows, filtered_wrek_shows):
+    """Download music from constants['WREK']."""
+    all_wrek_shows_names = [show.name for show in all_wrek_shows]
     # Show new programs
     set_of_new_programs = (
         set(all_wrek_shows_names)
@@ -197,7 +206,7 @@ def main(constants):
                     sorted(set_of_new_programs))
 
     for download_old in (True, False):
-        for show in whitelisted_wrek_shows:
+        for show in filtered_wrek_shows:
             show.download(
                 temporary_directory=constants['TEMPORARY_FOLDER'],
                 download_old_archive=download_old)
@@ -208,5 +217,7 @@ if __name__ == '__main__':
     args = parse_cli_arguments()
     setup_logging()
     constants = define_constants(args)
-    update_m3u_files.update_m3u_files(constants)
-    main(constants)
+    all_wrek_shows = initialize_all_wrek_shows(constants)
+    filtered_wrek_shows = filter_whitelisted_shows(constants, all_wrek_shows)
+    update_m3u_files.update_m3u_files(constants, filtered_wrek_shows)
+    main(constants, all_wrek_shows, filtered_wrek_shows)

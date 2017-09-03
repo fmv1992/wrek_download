@@ -1,4 +1,4 @@
-"""Description: auxiliar functions for the main program."""
+"""Auxiliar functions for the main program."""
 
 import datetime
 import time
@@ -11,10 +11,10 @@ import shutil
 def wait_for_change_day():
     u"""Wait to change for the next day.
 
-    This function is deprecated and will be removed in future versions.
-    The idea behind wait_for_change_day is that WREK may update its website
-    during the change of the day but having a threshold of days already prevents
-    this problem of downloading a link which has been recently updated.
+    This function is deprecated and will be removed in future versions. The
+    idea behind wait_for_change_day is that WREK may update its website during
+    the change of the day but having a threshold of days already prevents this
+    problem of downloading a link which has been recently updated.
 
     Arguments:
         (empty)

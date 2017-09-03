@@ -1,5 +1,4 @@
-u"""
-Update the archive folder with the newest m3u files.
+"""Update the archive folder with the newest m3u files.
 
 Updates the archive folder with the newest m3u files.
 Then updates the whitelist file as well to include new programs and move the
@@ -16,14 +15,16 @@ import re
 import shutil
 import logging
 import urllib.request
+import aux_functions as auxf
 
 
-def update_m3u_files(constants):
+def update_m3u_files(constants, filtered_wrek_shows):
     u"""Update the archive folder with the newest m3u files.
 
     Downloads WREK website and parses it using regular expressions.
 
     Arguments:
+        # TODO
         (empty)
 
     Returns:
@@ -44,10 +45,13 @@ def update_m3u_files(constants):
 
     # Get remote m3u files content.
     remote_m3u_content = dict()
-    for m3u in remote_m3u_file_names:
+    for one_show in [show for show in filtered_wrek_shows if
+                     show.m3u_filename in remote_m3u_file_names]:
+        m3u = one_show.m3u_filename
+        show_name = one_show.name
         h = urllib.request.urlopen(constants['URL_M3U'] + m3u)
         remote_m3u_content[m3u] = h.read().decode()
-        logging.debug('Added %s to m3u list.', m3u)
+        logging.debug('Added %s (%s) to m3u list.', m3u, show_name)
     # logging.debug('Got all remote m3u file contents.')
     # Put old suffix in every mp3 file as all the programs supposes that
     # they come with this prefix

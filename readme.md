@@ -1,4 +1,4 @@
-# Wrek Downloader
+# WREK Downloader
 
 Downloads the archive from http://www.wrek.org/ in mp3.
 
@@ -114,6 +114,11 @@ Lines starting with a `#` are ignored/comments. Thus only the first block of sho
 - ~~Move archive folder and temporary folder inside tempfile folder making both disposable.~~
 
 ## Changelog
+
+### Version 1.1.3
+
+- Filtered WREK shows prior to calling `update_m3u_files`.
+- Added several `TODO` to existing code.
 
 ### Version 1.1.2
 

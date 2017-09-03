@@ -1,23 +1,27 @@
-"""
-Parse WREK website correctly identifying shows and their important attributes.
+"""Parse WREK website.
 
 Create a Show object with all meaningful information regarding that show.
 
+# TODO
 Classes:
     Show: WREK radio show with meaningful attributes.
     Cl2: one line description.
 
+# TODO
 Functions:
     func1: one line description.
     func2: one line description.
 
+# TODO
 Exceptions:
     except1: one line description.
     except2: one line description.
 
+# TODO
 Examples:
     >>> print('hello world')
 
+# TODO
 References:
     [1] - Author, Work.
     [2] - Author, Work.
@@ -42,8 +46,7 @@ WEEKDAYS = ['monday',  # This is day zero
 
 
 class WREKShow(object):
-
-    u"""WREK radio show object.
+    """WREK radio show object.
 
     Methods:
         download: Download all the mp3 files in the m3u file.
@@ -67,7 +70,7 @@ class WREKShow(object):
                  m3u_filename,
                  show_number_in_day,
                  constants):
-        u"""The init function for this class."""
+        """Initiliaze instance."""
         self.begin_time = begin_time
         self.end_time = end_time
         self.m3u_filename = m3u_filename
