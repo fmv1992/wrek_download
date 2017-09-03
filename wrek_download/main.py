@@ -58,9 +58,10 @@ def parse_cli_arguments():
         required=False,
         default=False)
 
-    # TODO: add an argument for putting new programs to download on whitelist
-    # or just put them on #program_name
     args = parser.parse_args()
+
+    # TODO: add argument to define number of download threads.
+    args.n_threads = 5
 
     return args
 
@@ -97,6 +98,7 @@ def define_constants(arguments):
     OUTPUT_FOLDER = os.path.abspath(arguments.outputfolder)
     WHITELIST_FILE = os.path.abspath(arguments.whitelist)
     BATCH_MODE = arguments.batch
+    N_THREADS = arguments.n_threads
 
     # Test if target folders exist and whitelist file.
     LIST_OF_ARGUMENTS_FOLDERS = [ARCHIVE_FOLDER, TEMP_DOWNLOAD_FOLDER,
@@ -123,6 +125,7 @@ def define_constants(arguments):
         'OUTPUT_FOLDER': OUTPUT_FOLDER,
         'WHITELIST_FILE': WHITELIST_FILE,
         'BATCH_MODE': BATCH_MODE,
+        'N_THREADS': N_THREADS,
         'URL_WREK': URL_WREK,
         'URL_M3U': URL_M3U}
 

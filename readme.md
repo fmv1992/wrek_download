@@ -124,6 +124,12 @@ Fry').
 
 ## Changelog
 
+### Version 1.1.4
+
+- Added optional argument n_threads to CLI.
+- Added threading to `update_m3u_files`.
+- Added threading to `WREKShow.download`.
+
 ### Version 1.1.3
 
 - Filtered whitelisted WREK shows prior to calling `update_m3u_files` (thus

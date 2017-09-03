@@ -10,12 +10,31 @@ It moves the old, deprecated m3u files to archive_deprecated_folder.
 # pylama:ignore=W0611,W0511
 # TODO: put logging where needed
 # TODO: Notificate user that a new show is available
+import threading
+import queue
 import os
 import re
 import shutil
 import logging
 import urllib.request
 import aux_functions as auxf
+
+
+def threading_worker(constants, queue, dictionary):
+    """Create threads for downloading m3u files."""
+    while True:
+        item = queue.get()
+        if item is None:
+            break
+        else:
+            m3u = item.m3u_filename
+            url = constants['URL_M3U'] + m3u
+            h = urllib.request.urlopen(url)
+            website = h.read().decode()
+            dictionary[m3u] = website
+            show_name = item.name
+            logging.debug('Added %s (%s) to m3u list.', m3u, show_name)
+            queue.task_done()
 
 
 def update_m3u_files(constants, filtered_wrek_shows):
@@ -29,7 +48,6 @@ def update_m3u_files(constants, filtered_wrek_shows):
 
     Returns:
         bool: True if function runs sucessfully. False otherwise.
-
 
     """
     # Setting up HTTP object, WREK website as text and local m3u files.
@@ -45,13 +63,24 @@ def update_m3u_files(constants, filtered_wrek_shows):
 
     # Get remote m3u files content.
     remote_m3u_content = dict()
+
+    # Start threads and queue.
+    url_queue = queue.Queue()
+    download_threads = []
+    for _ in range(constants['N_THREADS']):
+        t = threading.Thread(target=threading_worker,
+                             args=(constants, url_queue, remote_m3u_content))
+        t.start()
+        download_threads.append(t)
     for one_show in [show for show in filtered_wrek_shows if
                      show.m3u_filename in remote_m3u_file_names]:
-        m3u = one_show.m3u_filename
-        show_name = one_show.name
-        h = urllib.request.urlopen(constants['URL_M3U'] + m3u)
-        remote_m3u_content[m3u] = h.read().decode()
-        logging.debug('Added %s (%s) to m3u list.', m3u, show_name)
+        url_queue.put(one_show)
+    url_queue.join()
+    for i in range(constants['N_THREADS']):
+        url_queue.put(None)
+    for i in range(constants['N_THREADS']):
+        download_threads[i].join()
+
     # logging.debug('Got all remote m3u file contents.')
     # Put old suffix in every mp3 file as all the programs supposes that
     # they come with this prefix
