@@ -85,7 +85,7 @@ class WREKShow(object):
             download_url,
             line_number_in_the_m3u_file,
             is_archive_file=False):
-        u"""Download the file from the URL given and name it accordingly.
+        """Download the file from the URL given and name it accordingly.
 
         Arguments:
             target_output_folder (str): path for the output folder.
@@ -176,7 +176,7 @@ class WREKShow(object):
             self,
             temporary_directory='/tmp',
             download_old_archive=True):
-        u"""Download the mp3 files referenced by the m3u file of the program.
+        """Download the mp3 files referenced by the m3u file of the program.
 
         The procedure for downloading is the following:
             1) Check wheter destination file exists. If True then skip this
@@ -237,13 +237,13 @@ class WREKShow(object):
         return True
 
     def __repr__(self):
-        u"""Representation for this object."""
+        """Representation for this object."""
         return ('Radio show {0.name} aired on {0.weekday} beginning '
                 'at {0.begin_time} and ending at {0.end_time}.'.format(self))
 
 
 def parse_wrek_website(url='http://www.wrek.org/schedule/'):
-    u"""Parse WREK Atlanta website.
+    """Parse WREK Atlanta website.
 
     Parse WREK Atlanta website using a set of regular expressions to properly
     initialize each program and its attributes.
@@ -262,7 +262,7 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
     def filter_non_allowed_chars(
             x,
             allowed=string.ascii_letters + string.digits + '_'):
-        u"""Filter out non allowed chars."""
+        """Filter out non allowed chars."""
         x = re.sub('[^{0}]+'.format(allowed), '_', x.lower())
         x = re.sub('_$', '', x)
         return x
@@ -290,7 +290,7 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
 
 
 def initialize_shows(constants):
-    u"""Initialize all the shows objects.
+    """Initialize all the shows objects.
 
     Arguments:
         (no arguments)

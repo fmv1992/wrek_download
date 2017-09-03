@@ -19,7 +19,7 @@ import aux_functions as auxf
 
 
 def update_m3u_files(constants, filtered_wrek_shows):
-    u"""Update the archive folder with the newest m3u files.
+    """Update the archive folder with the newest m3u files.
 
     Downloads WREK website and parses it using regular expressions.
 

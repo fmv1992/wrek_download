@@ -27,7 +27,7 @@ import update_m3u_files
 
 
 def parse_cli_arguments():
-    u"""Parse command line arguments for the main program."""
+    """Parse command line arguments for the main program."""
     # Parsing
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -66,7 +66,7 @@ def parse_cli_arguments():
 
 
 def define_constants(arguments):
-    u"""Define constants for this program."""
+    """Define constants for this program."""
     ROOT_FOLDER = os.path.dirname(
             os.path.dirname(
                         os.path.abspath(__file__)))

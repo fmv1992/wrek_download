@@ -9,7 +9,7 @@ import shutil
 
 
 def wait_for_change_day():
-    u"""Wait to change for the next day.
+    """Wait to change for the next day.
 
     This function is deprecated and will be removed in future versions. The
     idea behind wait_for_change_day is that WREK may update its website during
@@ -34,7 +34,7 @@ def wait_for_change_day():
 
 
 def create_whitelist(whitelistpath):
-    u"""Create a whitelist from whitelistpath.
+    """Create a whitelist from whitelistpath.
 
     Programs to be ignored should have their lines starting with a comment (#).
 
@@ -51,7 +51,7 @@ def create_whitelist(whitelistpath):
 
 
 def shows_in_whitelist(whitelistpath):
-    u"""Show whitelist from whitelistpath. All entries are included.
+    """Show whitelist from whitelistpath. All entries are included.
 
     In this function all programs will be read. The purpose of this function is
     to allow for the computation of new shows.
@@ -90,7 +90,7 @@ def check_output_file_exists(
 
 
 def include_programs_in_whitelist(whitelistpath, list_of_programs_to_include):
-    u"""Include a list of new programs in the whitelist file.
+    """Include a list of new programs in the whitelist file.
 
     The default behavior is to include them commented so they will not be
     downloaded.
@@ -131,7 +131,7 @@ def include_programs_in_whitelist(whitelistpath, list_of_programs_to_include):
 def move_downloaded_file(
         downloaded_file_path,
         destination_path):
-    u"""Move the downloaded file to the output folder.
+    """Move the downloaded file to the output folder.
 
     Arguments:
         downloaded_file_path (str): the path to the downloaded mp3 file.

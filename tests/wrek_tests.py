@@ -1,4 +1,4 @@
-u"""Test for WREK download program."""
+"""Test for WREK download program."""
 
 import unittest
 import random
@@ -15,10 +15,10 @@ from wrek_download.parse_wrek_website import initialize_shows
 
 class AuxiliarFunctionsTestCase(unittest.TestCase):
 
-    u"""Test the aux_functions.py file."""
+    """Test the aux_functions.py file."""
 
     def setUp(self):
-        u"""Set up test framework."""
+        """Set up test framework."""
         # Non existent paths
         self.non_existent_folder_path = os.path.abspath(
             '/tmp/{0}'.format(random.random()))
@@ -26,7 +26,7 @@ class AuxiliarFunctionsTestCase(unittest.TestCase):
             '/tmp/{0}'.format(random.random()))
 
     def test_create_whitelist(self):
-        u"""Test various errors for whitelist."""
+        """Test various errors for whitelist."""
         with self.assertRaises(FileNotFoundError):
             aux_functions.create_whitelist(
                 self.non_existent_file_path)
@@ -34,10 +34,10 @@ class AuxiliarFunctionsTestCase(unittest.TestCase):
 
 class WREKShowTestCase(unittest.TestCase):
 
-    u"""Test that an mp3 file was downloaded."""
+    """Test that an mp3 file was downloaded."""
 
     def setUp(self):
-        u"""Set up test framework."""
+        """Set up test framework."""
         self.wrek_programs = initialize_shows()
         # Paths
         self.archive_path = tempfile.TemporaryDirectory()
@@ -49,10 +49,10 @@ class WREKShowTestCase(unittest.TestCase):
 
 class AtmosphericsTestCase(WREKShowTestCase):
 
-    u"""Test that an Atmospherics mp3 file was downloaded."""
+    """Test that an Atmospherics mp3 file was downloaded."""
 
     def setUp(self):
-        u"""Set up test framework."""
+        """Set up test framework."""
         super(AtmosphericsTestCase, self,).setUp()
         self.program = [x for x in self.wrek_programs if 'atmospherics' in x][0]
         print(self.program)
