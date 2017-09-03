@@ -11,19 +11,33 @@ The range of downloading days should be 12 october untill 22 october
 (inclusive).
 """
 
-# TODO: add flexibility for not to depent of external libraries (urllib if I'm
-# not wrong)
 # TODO: download an entire week of WREK and check if there are 48 files.
-# TODO: create a notify flag to permanently notify the user of a new program.
-import tempfile
+import queue
+import threading
+
+from datetime import datetime as dt
+import argparse
+import logging
 import os
 import socket
-import logging
-import argparse
+import tempfile
+
 import aux_functions as auxf
 import parse_wrek_website
-from datetime import datetime as dt
 import update_m3u_files
+
+
+def threaded_download():
+    """Call WREKShow download."""
+    while True:
+        self_download_kwargs = download_queue.get()
+        if self_download_kwargs is None:
+            break
+        else:
+            show = self_download_kwargs.pop('show')
+            show.download(**self_download_kwargs)
+            logging.debug('Downloaded all files for show %s', str(show))
+            download_queue.task_done()
 
 
 def parse_cli_arguments():
@@ -208,12 +222,22 @@ def main(constants, all_wrek_shows, filtered_wrek_shows):
                     constants['WHITELIST_FILE'],
                     sorted(set_of_new_programs))
 
+    download_threads = []
+    for _ in range(constants['N_THREADS']):
+        t = threading.Thread(target=threaded_download)
+        t.start()
+        download_threads.append(t)
     for download_old in (True, False):
-        for show in filtered_wrek_shows:
-            show.download(
-                temporary_directory=constants['TEMPORARY_FOLDER'],
-                download_old_archive=download_old)
-            logging.debug('Downloaded all files for show %s', str(show))
+        for one_show in filtered_wrek_shows:
+            download_queue.put(
+                dict(show=one_show,
+                     temporary_directory=constants['TEMPORARY_FOLDER'],
+                     download_old_archive=download_old))
+    download_queue.join()
+    for _ in range(constants['N_THREADS']):
+        download_queue.put(None)
+    for i in range(constants['N_THREADS']):
+        download_threads[i].join()
 
 
 if __name__ == '__main__':
@@ -223,4 +247,5 @@ if __name__ == '__main__':
     all_wrek_shows = initialize_all_wrek_shows(constants)
     filtered_wrek_shows = filter_whitelisted_shows(constants, all_wrek_shows)
     update_m3u_files.update_m3u_files(constants, filtered_wrek_shows)
+    download_queue = queue.Queue()
     main(constants, all_wrek_shows, filtered_wrek_shows)

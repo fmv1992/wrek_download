@@ -92,6 +92,7 @@ class WREKShow(object):
             download_url (str): url to download.
             line_number_in_the_m3u_file (int): line number in the m3u file.
             Important because of file naming.
+            is_archive_file (bool): if the file is from the previous week.
 
         Returns:
             bool: True if no errors happened during execution.
@@ -191,49 +192,38 @@ class WREKShow(object):
             bool: True if function runs successfully. False otherwise.
 
         """
-        with open(
-                os.path.join(  # noqa
-                    self.constants['ARCHIVE_FOLDER'],
-                    self.m3u_filename),
-                'rt') as m3ufile:  # noqa
+        with open(os.path.join(self.constants['ARCHIVE_FOLDER'],
+                               self.m3u_filename),
+                  'rt') as m3ufile:
             m3u_file_content = m3ufile.readlines()
 
-        # if download_old_archive:
-            # iterate_over_new_and_old = (True, False)
-        # else:
-            # iterate_over_new_and_old = (False, )
-
-        # for is_archive_file in iterate_over_new_and_old:
-            for line_number, m3uline in enumerate(m3u_file_content):
-                filename = self._create_filename(line_number,
-                                                 download_old_archive)
-                # Filename will return '' for days within threshold to avoid
-                # file management problems (we are playing on the safe side
-                # here giving WREK staff a couple of days to update their
-                # webiste).
-                if not filename:
-                    continue
-                if auxf.check_output_file_exists(
-                        self.constants['OUTPUT_FOLDER'], filename):
-                    logging.debug('File %s exists.', filename)
-                else:
-                    logging.debug('File %s does not exist.', filename)
-                    if self._download_one_file_from_m3u_file(
+        for line_number, m3uline in enumerate(m3u_file_content):
+            filename = self._create_filename(line_number, download_old_archive)
+            # Filename will return '' for days within threshold to avoid file
+            # management problems (we are playing on the safe side here giving
+            # WREK staff a couple of days to update their webiste).
+            if not filename:
+                continue
+            if auxf.check_output_file_exists(
+                    self.constants['OUTPUT_FOLDER'], filename):
+                logging.debug('File %s exists.', filename)
+            else:
+                logging.debug('File %s does not exist.', filename)
+                if self._download_one_file_from_m3u_file(
                             self.constants['TEMP_DOWNLOAD_FOLDER'],
                             m3uline,
                             line_number,
                             download_old_archive):
-                        auxf.move_downloaded_file(
-                            os.path.join(
-                                self.constants['TEMP_DOWNLOAD_FOLDER'],
-                                filename),
-                            os.path.join(
-                                self.constants['OUTPUT_FOLDER'],
-                                filename))
-                        logging.info('Downloaded show %s.',
-                                     filename)
-                    else:
-                        return False
+                    auxf.move_downloaded_file(
+                        os.path.join(
+                            self.constants['TEMP_DOWNLOAD_FOLDER'],
+                            filename),
+                        os.path.join(
+                            self.constants['OUTPUT_FOLDER'],
+                            filename))
+                    logging.info('Downloaded show %s.', filename)
+                else:
+                    return False
         return True
 
     def __repr__(self):
