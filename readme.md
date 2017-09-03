@@ -16,10 +16,6 @@ Music you don't hear on the radio.
 
     cd wrek_download/
     python3 wrek_download/main.py --help
-    usage: main.py [-h] [--verbose] [--verbosity VERBOSITY] --outputfolder
-                OUTPUTFOLDER --whitelist WHITELIST [--batch]
-
-    optional arguments:
     -h, --help              show this help message and exit
     --verbose               puts the program in verbose mode.
     --verbosity VERBOSITY
@@ -32,7 +28,8 @@ Music you don't hear on the radio.
                             text file with the program names to be downloaded.
     --batch                 if present skip any prompt and follow some
                             default/sane option.
-
+    --n_threads N_THREADS
+                            number of threads to use for downloading.
 
 This program downloads the files from the archive formatted with YYYYMMDD
 followed by the program number of the day NN followed by the name of the
