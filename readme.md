@@ -9,7 +9,7 @@ Music you don't hear on the radio.
 ### Minimal working example
 
     cd wrek_download/
-    python3 wrek_download/main.py --outputfolder /tmp/my_music_folder \
+    python3 ./wrek_download/main.py --outputfolder /tmp/my_music_folder \
                                     --whitelist /tmp/whitelist.txt
 
 ### All arguments

@@ -1,5 +1,14 @@
 language: python
 python:
     - "3.4"
+before_install:
+    - export TRAVIS_OUTDIR=/tmp/wrekoutdir
+    - export TRAVIS_WHITELIST=/tmp/whitelist.txt
+    # One of the longest running shows of WREK (supposedly most stable).
+    - echo "stonehenge" > $TRAVIS_WHITELIST
+    - mkdir $TRAVIS_OUTDIR
 script:
-    "python3 -m unittest tests/wrek_tests.py"
+    # Test help.
+    - python3 ./wrek_download/main.py --help
+    # Test cli arguments.
+    - python3 ./wrek_download/main.py --batch --verbose --verbosity 2 --whitelist $TRAVIS_WHITELIST --n_threads 3 --outputfolder $TRAVIS_OUTDIR
