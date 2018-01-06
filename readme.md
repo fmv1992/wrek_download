@@ -1,3 +1,5 @@
+![](https://travis-ci.org/fmv1992/wrek_download.svg?branch=dev)
+
 # WREK Downloader
 
 Downloads the archive from http://www.wrek.org/ in mp3.
