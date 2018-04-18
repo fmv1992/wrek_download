@@ -119,6 +119,7 @@ Fry').
 - ~~Use tempfile as temporary folder.~~
 - ~~Move archive folder and temporary folder inside tempfile folder making both
   disposable.~~
+- Kill main process if threads stop running: <https://stackoverflow.com/questions/2829329/catch-a-threads-exception-in-the-caller-thread-in-python>.
 
 ## Changelog
 
