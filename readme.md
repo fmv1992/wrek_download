@@ -120,6 +120,11 @@ Fry').
 - ~~Move archive folder and temporary folder inside tempfile folder making both
   disposable.~~
 - Kill main process if threads stop running: <https://stackoverflow.com/questions/2829329/catch-a-threads-exception-in-the-caller-thread-in-python>.
+    * https://stackoverflow.com/questions/19652446/python-program-with-thread-cant-catch-ctrlc
+    * https://stackoverflow.com/questions/8774958/keyerror-in-module-threading-after-a-successful-py-test-run
+    * https://stackoverflow.com/questions/42131668/python-thread-terminate-or-kill-in-the-best-way
+    * Very hard.
+    * Don't kill the threads inside python program; improve your overall method.
 
 ## Changelog
 

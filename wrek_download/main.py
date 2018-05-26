@@ -12,14 +12,19 @@ The range of downloading days should be 12 october untill 22 october
 """
 
 # TODO: download an entire week of WREK and check if there are 48 files.
+import sys
+import time
 import queue
 import threading
+
+# For error handling.
+import urllib
+import socket
 
 from datetime import datetime as dt
 import argparse
 import logging
 import os
-import socket
 import tempfile
 
 import aux_functions as auxf
@@ -35,7 +40,15 @@ def threaded_download():
             break
         else:
             show = self_download_kwargs.pop('show')
-            show.download(**self_download_kwargs)
+            try:
+                show.download(**self_download_kwargs)
+                sucessful_queue.put(1)
+            except urllib.error.URLError as urlexception:
+                exception_queue.put(1)
+                raise urlexception
+            except socket.timeout as timeoutexception:
+                exception_queue.put(1)
+                raise timeoutexception
             logging.debug('Downloaded all files for show %s', str(show))
             download_queue.task_done()
 
@@ -87,8 +100,8 @@ def parse_cli_arguments():
 def define_constants(arguments):
     """Define constants for this program."""
     ROOT_FOLDER = os.path.dirname(
-            os.path.dirname(
-                        os.path.abspath(__file__)))
+        os.path.dirname(
+            os.path.abspath(__file__)))
 
     # TODO: already declared somewhere, jsut to cover a hole.
     WEEKDAYS = ['monday',  # This is day zero
@@ -106,6 +119,7 @@ def define_constants(arguments):
     # TEMPORARY_FOLDER = os.path.abspath(arguments.temporaryfolder)
 
     TEMPORARY_FOLDER = tempfile.TemporaryDirectory(prefix='wrek_download_tmp')
+    # TODO: print parsed command line arguments. Not just temp folder.
     logging.debug('Temporary folder is: %s.', TEMPORARY_FOLDER.name)
     ARCHIVE_FOLDER = os.path.join(TEMPORARY_FOLDER.name, 'archive')
     os.mkdir(ARCHIVE_FOLDER)
@@ -231,17 +245,41 @@ def main(constants, all_wrek_shows, filtered_wrek_shows):
         t = threading.Thread(target=threaded_download)
         t.start()
         download_threads.append(t)
+
+    # Populate show queue.
     for download_old in (True, False):
         for one_show in filtered_wrek_shows:
             download_queue.put(
                 dict(show=one_show,
                      temporary_directory=constants['TEMPORARY_FOLDER'],
                      download_old_archive=download_old))
-    download_queue.join()
+
+    # Wait for workers to execute their job.
+    # TODO: define a timeout argument.
+    timeout = 2
+    stop = time.time() + timeout
+    while ((download_queue.unfinished_tasks and time.time() < stop)
+           and
+           (exception_queue.qsize() < constants['N_THREADS'])):
+        time.sleep(1)
+
     for _ in range(constants['N_THREADS']):
         download_queue.put(None)
     for i in range(constants['N_THREADS']):
         download_threads[i].join()
+
+    # Evaluate termination condition of the main program.
+    if not exception_queue.qsize() < constants['N_THREADS']:
+        logging.debug('All threads ({0}} have died. Exit code: 1.'.format(
+            exception_queue.qsize()))
+        return 1
+    elif download_queue.unfinished_tasks:
+        logging.debug('Program timed out. Exit code: 2.')
+        return 2
+    else:
+        download_queue.join()
+        logging.debug('Program execution sucessful. Exit code: 0.')
+        return 0
 
 
 if __name__ == '__main__':
@@ -252,4 +290,7 @@ if __name__ == '__main__':
     filtered_wrek_shows = filter_whitelisted_shows(constants, all_wrek_shows)
     update_m3u_files.update_m3u_files(constants, filtered_wrek_shows)
     download_queue = queue.Queue()
-    main(constants, all_wrek_shows, filtered_wrek_shows)
+    exception_queue = queue.Queue()
+    sucessful_queue = queue.Queue()
+    return_code = main(constants, all_wrek_shows, filtered_wrek_shows)
+    sys.exit(return_code)
