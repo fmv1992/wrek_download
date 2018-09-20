@@ -270,7 +270,7 @@ def main(constants, all_wrek_shows, filtered_wrek_shows):
 
     # Evaluate termination condition of the main program.
     if not exception_queue.qsize() < constants['N_THREADS']:
-        logging.debug('All threads ({0}} have died. Exit code: 1.'.format(
+        logging.debug('All threads ({0}) have died. Exit code: 1.'.format(
             exception_queue.qsize()))
         return 1
     elif download_queue.unfinished_tasks:
