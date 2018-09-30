@@ -111,6 +111,7 @@ Fry').
 
 ## TODO
 
+- Exit codes are wrong. Even if all music is already downloaded there is a error exit code.
 - Improve meaningfulness of the tests.
 - ~~Download only m3u files present in the whitelist file (thus making the
   downloading phase faster).~~ (v1.1.3)
