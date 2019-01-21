@@ -37,6 +37,7 @@ def threaded_download():
     while True:
         self_download_kwargs = download_queue.get()
         if self_download_kwargs is None:
+            download_queue.task_done()
             break
         else:
             show = self_download_kwargs.pop('show')
@@ -51,6 +52,7 @@ def threaded_download():
                 raise timeoutexception
             logging.debug('Downloaded all files for show %s', str(show))
             download_queue.task_done()
+    return None
 
 
 def parse_cli_arguments():
@@ -125,7 +127,6 @@ def define_constants(arguments):
     os.mkdir(ARCHIVE_FOLDER)
     TEMP_DOWNLOAD_FOLDER = os.path.join(TEMPORARY_FOLDER.name, 'temp_download')
     os.mkdir(TEMP_DOWNLOAD_FOLDER)
-    # print(tuple(os.walk(TEMPORARY_FOLDER.name)))
 
     OUTPUT_FOLDER = os.path.abspath(arguments.outputfolder)
     WHITELIST_FILE = os.path.abspath(arguments.whitelist)
@@ -256,11 +257,13 @@ def main(constants, all_wrek_shows, filtered_wrek_shows):
 
     # Wait for workers to execute their job.
     # TODO: define a timeout argument.
-    timeout = 2
+    # 5 minutes; that's equivalent to a 92 kbytes/s connection for a 27 M file
+    # size.
+    timeout = 5 * 60
     stop = time.time() + timeout
-    while ((download_queue.unfinished_tasks and time.time() < stop)
-           and
-           (exception_queue.qsize() < constants['N_THREADS'])):
+    while (download_queue.unfinished_tasks
+           and time.time() < stop
+           and exception_queue.qsize() < constants['N_THREADS']):
         time.sleep(1)
 
     for _ in range(constants['N_THREADS']):
@@ -294,3 +297,4 @@ if __name__ == '__main__':
     sucessful_queue = queue.Queue()
     return_code = main(constants, all_wrek_shows, filtered_wrek_shows)
     sys.exit(return_code)
+
