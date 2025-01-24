@@ -1,11 +1,11 @@
 """Auxiliar functions for the main program."""
 
 import datetime
-import time
-import re
-import os
 import logging
+import os
+import re
 import shutil
+import time
 
 
 def wait_for_change_day():
@@ -23,10 +23,12 @@ def wait_for_change_day():
         None.
 
     """
-    if (datetime.datetime.now().hour == 23 and
-            datetime.datetime.now().minute >= 50):
-        print('Waiting for day to change')
-        time.sleep(15*60)
+    if (
+        datetime.datetime.now().hour == 23
+        and datetime.datetime.now().minute >= 50
+    ):
+        print("Waiting for day to change")
+        time.sleep(15 * 60)
         return True
     else:
         return False
@@ -46,8 +48,8 @@ def create_whitelist(whitelistpath):
         list: list of all whitelisted programs.
 
     """
-    with open(whitelistpath, 'rt') as f:
-        return re.findall('^[^#\s]+?$', f.read(), flags=re.MULTILINE)
+    with open(whitelistpath, "rt") as f:
+        return re.findall("^[^#\s]+?$", f.read(), flags=re.MULTILINE)
 
 
 def shows_in_whitelist(whitelistpath):
@@ -64,14 +66,13 @@ def shows_in_whitelist(whitelistpath):
         list: list of all programs included in the whitelist.
 
     """
-    with open(whitelistpath, 'rt') as f:
+    with open(whitelistpath, "rt") as f:
         return sorted(
-            [x.replace('#', '').replace('\n', '') for x in f.readlines()])
+            [x.replace("#", "").replace("\n", "") for x in f.readlines()]
+        )
 
 
-def check_output_file_exists(
-        target_output_folder,
-        target_output_file):
+def check_output_file_exists(target_output_folder, target_output_file):
     """Check wheter file to be downloaded already exists.
 
     Arguments:
@@ -82,8 +83,7 @@ def check_output_file_exists(
         bool: True if file already exists. False otherwise.
 
     """
-    if os.path.isfile(os.path.join(
-            target_output_folder, target_output_file)):
+    if os.path.isfile(os.path.join(target_output_folder, target_output_file)):
         return True
     else:
         return False
@@ -106,31 +106,35 @@ def include_programs_in_whitelist(whitelistpath, list_of_programs_to_include):
         bool: True if function is successful. False otherwise.
 
     """
-    with open(whitelistpath, 'r+') as f:
-        raw_programs = (f.readlines()
-                        + ['#' + x for x in list_of_programs_to_include])
+    with open(whitelistpath, "r+") as f:
+        raw_programs = f.readlines() + [
+            "#" + x for x in list_of_programs_to_include
+        ]
         f.seek(0)
         program_is_commented = map(
-            lambda x: True if x.startswith('#') else False,
-            raw_programs)
-        programs_without_hash = [x.replace('#', '').replace('\n', '')
-                                 for x in raw_programs]
+            lambda x: True if x.startswith("#") else False, raw_programs
+        )
+        programs_without_hash = [
+            x.replace("#", "").replace("\n", "") for x in raw_programs
+        ]
         map_program_to_is_commented = dict(
-            zip(programs_without_hash, program_is_commented))
+            zip(programs_without_hash, program_is_commented)
+        )
         all_programs = sorted(programs_without_hash)
         all_programs_adj_to_hash = map(
-            lambda x: '#' + x if map_program_to_is_commented[x] else x,
-            all_programs)
-        f.write('\n'.join(all_programs_adj_to_hash))
+            lambda x: "#" + x if map_program_to_is_commented[x] else x,
+            all_programs,
+        )
+        f.write("\n".join(all_programs_adj_to_hash))
         f.truncate()
-        logging.debug('Included the following programs in whitelist file:\n%s',
-                      '\n'.join(list_of_programs_to_include))
+        logging.debug(
+            "Included the following programs in whitelist file:\n%s",
+            "\n".join(list_of_programs_to_include),
+        )
     return True
 
 
-def move_downloaded_file(
-        downloaded_file_path,
-        destination_path):
+def move_downloaded_file(downloaded_file_path, destination_path):
     """Move the downloaded file to the output folder.
 
     Arguments:

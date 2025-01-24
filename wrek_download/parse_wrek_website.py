@@ -28,21 +28,24 @@ References:
 
 """
 
-import urllib.request
+import datetime
+import logging
 import os
 import re
 import string
-import datetime
-import aux_functions as auxf
-import logging
+import urllib.request
 
-WEEKDAYS = ['monday',  # This is day zero
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-            'sunday']
+import aux_functions as auxf
+
+WEEKDAYS = [
+    "monday",  # This is day zero
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+]
 
 
 class WREKShow(object):
@@ -62,14 +65,16 @@ class WREKShow(object):
 
     """
 
-    def __init__(self,
-                 name,
-                 weekday,
-                 begin_time,
-                 end_time,
-                 m3u_filename,
-                 show_number_in_day,
-                 constants):
+    def __init__(
+        self,
+        name,
+        weekday,
+        begin_time,
+        end_time,
+        m3u_filename,
+        show_number_in_day,
+        constants,
+    ):
         """Initiliaze instance."""
         self.begin_time = begin_time
         self.end_time = end_time
@@ -80,11 +85,12 @@ class WREKShow(object):
         self.constants = constants
 
     def _download_one_file_from_m3u_file(
-            self,
-            target_output_folder,
-            download_url,
-            line_number_in_the_m3u_file,
-            is_archive_file=False):
+        self,
+        target_output_folder,
+        download_url,
+        line_number_in_the_m3u_file,
+        is_archive_file=False,
+    ):
         """Download the file from the URL given and name it accordingly.
 
         Arguments:
@@ -99,33 +105,31 @@ class WREKShow(object):
 
         """
         if not is_archive_file:
-            download_url = download_url.replace('_old', '')
-        filename = self._create_filename(line_number_in_the_m3u_file,
-                                         is_archive_file)
+            download_url = download_url.replace("_old", "")
+        filename = self._create_filename(
+            line_number_in_the_m3u_file, is_archive_file
+        )
         try:
             urllib.request.urlretrieve(
                 download_url,
                 filename=os.path.join(
-                    self.constants['TEMP_DOWNLOAD_FOLDER'],
-                    filename)
+                    self.constants["TEMP_DOWNLOAD_FOLDER"], filename
+                ),
             )
         except urllib.error.HTTPError as error01:
             # TODO: info is not the best choice here
             # TODO: logging is not correct and error's cause is not
             # investigated yet
             logging.info(
-                'Could not download {0} due to {1}'.format(
-                    self.__repr__(),
-                    error01))
-            logging.debug(
-                'Failed with URL: %s', download_url)
+                "Could not download {0} due to {1}".format(
+                    self.__repr__(), error01
+                )
+            )
+            logging.debug("Failed with URL: %s", download_url)
             return False
         return True
 
-    def _create_filename(
-            self,
-            line_number_in_the_m3u_file,
-            is_archive_file):
+    def _create_filename(self, line_number_in_the_m3u_file, is_archive_file):
         """Create a unique filename for each show based on its attributes.
 
         Create a filename of the format:
@@ -156,27 +160,30 @@ class WREKShow(object):
         # website so often.
         threshold_to_skip_download = datetime.timedelta(2)  # In days.
 
-        while (aired_day.weekday()
-               != self.constants['WEEKDAYS'].index(self.weekday)):
+        while aired_day.weekday() != self.constants["WEEKDAYS"].index(
+            self.weekday
+        ):
             aired_day -= datetime.timedelta(days=1)
         if is_archive_file:
             aired_day -= 7 * datetime.timedelta(days=1)
         if now - aired_day <= threshold_to_skip_download:
-            return ''
+            return ""
 
-        name = (str(aired_day.year)
-                + '{0:02d}'.format(aired_day.month)
-                + '{0:02d}'.format(aired_day.day) + '_'
-                + '{0:02d}'.format(self.show_number_in_day) + '_'
-                + self.name + '_'
-                + '{0:02d}.mp3'.format(line_number_in_the_m3u_file))
+        name = (
+            str(aired_day.year)
+            + "{0:02d}".format(aired_day.month)
+            + "{0:02d}".format(aired_day.day)
+            + "_"
+            + "{0:02d}".format(self.show_number_in_day)
+            + "_"
+            + self.name
+            + "_"
+            + "{0:02d}.mp3".format(line_number_in_the_m3u_file)
+        )
 
         return name
 
-    def download(
-            self,
-            temporary_directory='/tmp',
-            download_old_archive=True):
+    def download(self, temporary_directory="/tmp", download_old_archive=True):
         """Download the mp3 files referenced by the m3u file of the program.
 
         The procedure for downloading is the following:
@@ -192,9 +199,10 @@ class WREKShow(object):
             bool: True if function runs successfully. False otherwise.
 
         """
-        with open(os.path.join(self.constants['ARCHIVE_FOLDER'],
-                               self.m3u_filename),
-                  'rt') as m3ufile:
+        with open(
+            os.path.join(self.constants["ARCHIVE_FOLDER"], self.m3u_filename),
+            "rt",
+        ) as m3ufile:
             m3u_file_content = m3ufile.readlines()
 
         for line_number, m3uline in enumerate(m3u_file_content):
@@ -205,34 +213,39 @@ class WREKShow(object):
             if not filename:
                 continue
             if auxf.check_output_file_exists(
-                    self.constants['OUTPUT_FOLDER'], filename):
-                logging.debug('File %s exists.', filename)
+                self.constants["OUTPUT_FOLDER"], filename
+            ):
+                logging.debug("File %s exists.", filename)
             else:
-                logging.debug('File %s does not exist.', filename)
+                logging.debug("File %s does not exist.", filename)
                 if self._download_one_file_from_m3u_file(
-                            self.constants['TEMP_DOWNLOAD_FOLDER'],
-                            m3uline,
-                            line_number,
-                            download_old_archive):
+                    self.constants["TEMP_DOWNLOAD_FOLDER"],
+                    m3uline,
+                    line_number,
+                    download_old_archive,
+                ):
                     auxf.move_downloaded_file(
                         os.path.join(
-                            self.constants['TEMP_DOWNLOAD_FOLDER'],
-                            filename),
+                            self.constants["TEMP_DOWNLOAD_FOLDER"], filename
+                        ),
                         os.path.join(
-                            self.constants['OUTPUT_FOLDER'],
-                            filename))
-                    logging.info('Downloaded show %s.', filename)
+                            self.constants["OUTPUT_FOLDER"], filename
+                        ),
+                    )
+                    logging.info("Downloaded show %s.", filename)
                 else:
                     return False
         return True
 
     def __repr__(self):
         """Representation for this object."""
-        return ('Radio show {0.name} aired on {0.weekday} beginning '
-                'at {0.begin_time} and ending at {0.end_time}.'.format(self))
+        return (
+            "Radio show {0.name} aired on {0.weekday} beginning "
+            "at {0.begin_time} and ending at {0.end_time}.".format(self)
+        )
 
 
-def parse_wrek_website(url='http://www.wrek.org/schedule/'):
+def parse_wrek_website(url="https://www.wrek.org/schedule"):
     """Parse WREK Atlanta website.
 
     Parse WREK Atlanta website using a set of regular expressions to properly
@@ -249,32 +262,38 @@ def parse_wrek_website(url='http://www.wrek.org/schedule/'):
             corrisponds to each day of the week starting from Monday.
 
     """
+
     def filter_non_allowed_chars(
-            x,
-            allowed=string.ascii_letters + string.digits + '_'):
+        x, allowed=string.ascii_letters + string.digits + "_"
+    ):
         """Filter out non allowed chars."""
-        x = re.sub('[^{0}]+'.format(allowed), '_', x.lower())
-        x = re.sub('_$', '', x)
+        x = re.sub("[^{0}]+".format(allowed), "_", x.lower())
+        x = re.sub("_$", "", x)
         return x
+
     h = urllib.request.urlopen(url)
     content = h.read()
-    weekdays = re.findall(
-        'schedule-day' + '.*?' + 'grid_3',
-        content.decode())
-    parsed_times = [re.findall('(?<=schedule-time">)(.+?)<',
-                               x) for x in weekdays]
-    begin_times = [['00:00 AM'] + x for x in parsed_times]
-    end_times = [x[1:] + ['11:59 PM'] for x in parsed_times]
+    weekdays = re.findall("schedule-day" + ".*?" + "grid_3", content.decode())
+    parsed_times = [
+        re.findall('(?<=schedule-time">)(.+?)<', x) for x in weekdays
+    ]
+    begin_times = [["00:00 AM"] + x for x in parsed_times]
+    end_times = [x[1:] + ["11:59 PM"] for x in parsed_times]
     names = [re.findall('(?<=schedule-show">)(.+?)<', x) for x in weekdays]
     names = list(list(map(filter_non_allowed_chars, n)) for n in names)
     parsed_m3u_urls = [
-        re.findall('(?<=schedule-archive"><a href="/playlist\.php/main/128kbs/'
-                   'current/)(.+?)">', x) for x in weekdays]
+        re.findall(
+            '(?<=schedule-archive"><a href="/playlist\.php/main/128kbs/'
+            'current/)(.+?)">',
+            x,
+        )
+        for x in weekdays
+    ]
     attributes_to_show_object = {
-        'begin_times': begin_times,
-        'end_times': end_times,
-        'names': names,
-        'm3u_urls': parsed_m3u_urls
+        "begin_times": begin_times,
+        "end_times": end_times,
+        "names": names,
+        "m3u_urls": parsed_m3u_urls,
     }
     return attributes_to_show_object
 
@@ -294,18 +313,20 @@ def initialize_shows(constants):
     # Adjusing m3u
     for index_day, weekday in enumerate(WEEKDAYS):
         for index_program, program in enumerate(
-                parsed_shows_data['names'][index_day]):
+            parsed_shows_data["names"][index_day]
+        ):
             all_shows.append(
                 WREKShow(
-                    program,    # name
-                    weekday,    # weekday
+                    program,  # name
+                    weekday,  # weekday
                     # begin time
-                    parsed_shows_data['begin_times'][index_day][index_program],
+                    parsed_shows_data["begin_times"][index_day][index_program],
                     # end time
-                    parsed_shows_data['end_times'][index_day][index_program],
+                    parsed_shows_data["end_times"][index_day][index_program],
                     # m3u_filename
-                    parsed_shows_data['m3u_urls'][index_day][index_program],
+                    parsed_shows_data["m3u_urls"][index_day][index_program],
                     index_program,  # show number in day
                     constants,  # constants
-                ))
+                )
+            )
     return all_shows
